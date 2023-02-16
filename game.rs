@@ -51,6 +51,7 @@ struct Monster {
     x: f32,
     y: f32,
     speed: f32,
+    size: f32,
 }
 
 fn main() {
@@ -73,12 +74,31 @@ fn main() {
             let dx = player_x - monster.x;
             let dy = player_y - monster.y;
             let d = (dx * dx + dy * dy).sqrt();
-            monster.x += dx / d * monster.speed / TICK.as_millis() as f32 * 1000.0;
-            monster.y += dy / d * monster.speed / TICK.as_millis() as f32 * 1000.0;
+            monster.x += dx / d * monster.speed / TICK.as_secs_f32();
+            monster.y += dy / d * monster.speed / TICK.as_secs_f32();
+        }
+        for i in 0..monsters.len() {
+            for j in 0..monsters.len() {
+                if i != j {
+                    let monster = &monsters[i];
+                    let other = &monsters[j];
+                    let dx = other.x - monster.x;
+                    let dy = other.y - monster.y;
+                    let d = (dx * dx + dy * dy).sqrt();
 
+                    if d < monster.size + other.size {
+                        let speed = monster.speed;
+                        let mut monster = &mut monsters[i];
+                        monster.x -= dx / d * speed / TICK.as_secs_f32();
+                        monster.y -= dy / d * speed / TICK.as_secs_f32();
+                    }
+                }
+            }
+        }
+        for monster in monsters.iter() {
             let sx = monster.x - player_x + width as f32 / 2.0;
             let sy = monster.y - player_y + height as f32 / 2.0;
-            circle(&mut screen, sx, sy, 10.0, [0xff, 0x00, 0x00]);
+            circle(&mut screen, sx, sy, monster.size, [0xff, 0x00, 0x00]);
         }
 
         if rng.gen_range(0, 3) == 0 {
@@ -106,6 +126,7 @@ fn main() {
                 x: spawn_x + player_x - width as f32 / 2.0,
                 y: spawn_y + player_y - height as f32 / 2.0,
                 speed: 0.02,
+                size: 10.0,
             });
         }
 
