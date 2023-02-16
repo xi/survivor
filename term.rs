@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 const TIOCGWINSZ: u64 = 21523;
 
 extern "C" {
@@ -82,6 +84,7 @@ pub struct Screen {
     pub width: usize,
     pub height: usize,
     pixels: Vec<Vec<[u8; 3]>>,
+    prev_time: Instant,
 }
 
 impl Drop for Screen {
@@ -99,6 +102,7 @@ impl Screen {
             width: width,
             height: height,
             pixels: vec![vec![[0, 0, 0]; width]; height],
+            prev_time: Instant::now(),
         }
     }
 
@@ -106,7 +110,7 @@ impl Screen {
         self.pixels[y][x] = color;
     }
 
-    pub fn render(&self) {
+    pub fn render(&mut self) {
         let mut prev_bg = [0x00, 0x00, 0x00];
         let mut prev_fg = [0xff, 0xff, 0xff];
 
@@ -133,6 +137,11 @@ impl Screen {
                 print!("{}", block6(block));
             }
         }
+
         println!("\x1b[0m");
+
+        let now = Instant::now();
+        print!("{:?}", 1.0 / (now - self.prev_time).as_secs_f64());
+        self.prev_time = now;
     }
 }
