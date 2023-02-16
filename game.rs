@@ -95,6 +95,7 @@ fn main() {
                 }
             }
         }
+        monsters.sort_unstable_by_key(|m| m.y as i32);
         for monster in monsters.iter() {
             let sx = monster.x - player_x + width as f32 / 2.0;
             let sy = monster.y - player_y + height as f32 / 2.0;
