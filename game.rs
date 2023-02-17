@@ -1,7 +1,7 @@
-#[path = "term.rs"] mod term;
-#[path = "input.rs"] mod input;
-#[path = "signal.rs"] mod signal;
-#[path = "random.rs"] mod random;
+mod term;
+mod input;
+mod signal;
+mod random;
 
 use std::{thread, time};
 use std::sync::atomic::{AtomicBool, Ordering};
