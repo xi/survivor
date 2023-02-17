@@ -1,4 +1,5 @@
 const TIOCGWINSZ: u64 = 21523;
+const Y_FACTOR: f32 = 1.4;
 
 extern "C" {
     fn ioctl(fd: i32, req: u64, ...) -> i64;
@@ -138,5 +139,35 @@ impl Screen {
         }
 
         println!("\x1b[0m");
+    }
+
+    pub fn convert_x(&self, x: f32) -> Option<usize> {
+        if x < 0.0 {
+            return None;
+        }
+        let u = x as usize;
+        if u >= self.width {
+            return None;
+        }
+        return Some(u);
+    }
+
+    pub fn convert_y(&self, y: f32) -> Option<usize> {
+        if y < 0.0 {
+            return None;
+        }
+        let u = (y / Y_FACTOR) as usize;
+        if u >= self.height {
+            return None;
+        }
+        return Some(u);
+    }
+
+    pub fn iconvert_x(&self, x: usize) -> f32 {
+        return x as f32;
+    }
+
+    pub fn iconvert_y(&self, y: usize) -> f32 {
+        return y as f32 * Y_FACTOR;
     }
 }
