@@ -67,6 +67,8 @@ fn main() {
     signal::on_ctrlc(on_ctrlc);
 
     while RUNNING.load(Ordering::Relaxed) {
+        let time1 = time::Instant::now();
+
         clear(&mut screen);
         circle(&mut screen, width as f32 / 2.0, height as f32 / 2.0, 15.0, [0x00, 0x00, 0xff]);
 
@@ -132,7 +134,13 @@ fn main() {
         }
 
         screen.render();
-        thread::sleep(TICK);
+
+        let time2 = time::Instant::now();
+        if TICK > time2 - time1 {
+            thread::sleep(TICK - (time2 - time1));
+        }
+        let time3 = time::Instant::now();
+        print!("{:?}", 1.0 / (time3 - time1).as_secs_f64());
     }
 }
 
