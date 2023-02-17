@@ -1,7 +1,8 @@
 mod term;
 mod input;
-mod signal;
 mod random;
+
+extern crate libc;
 
 use std::{thread, time};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -72,7 +73,9 @@ fn main() {
     let mut player_speed = 30.0;
     let mut player_dir = Dir::Up;
 
-    signal::on_ctrlc(on_ctrlc);
+    unsafe {
+        libc::signal(libc::SIGINT, on_ctrlc as usize);
+    }
 
     let mut time0 = time::Instant::now();
 
