@@ -26,4 +26,10 @@ impl Rng {
     pub fn gen_range(&mut self, low: usize, high: usize) -> usize {
         return low + self.gen() % (high - low);
     }
+
+    pub fn gen_f32(&mut self) -> f32 {
+        // https://en.wikipedia.org/wiki/Single-precision_floating-point_format
+        let u = self.gen() as u32;
+        return f32::from_bits((127 << 23) | u >> 9) - 1.0;
+    }
 }
