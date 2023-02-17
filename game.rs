@@ -1,4 +1,5 @@
 #[path = "term.rs"] mod term;
+#[path = "input.rs"] mod input;
 #[path = "signal.rs"] mod signal;
 #[path = "random.rs"] mod random;
 
@@ -59,6 +60,7 @@ struct Monster {
 }
 
 fn main() {
+    let input = input::Input::new();
     let mut screen = term::Screen::new();
     let mut rng = random::Rng::new();
     let width = screen.iconvert_x(screen.width);
@@ -80,6 +82,15 @@ fn main() {
 
         clear(&mut screen);
         circle(&mut screen, width / 2.0, height / 2.0, 15.0, [0x00, 0x00, 0xff]);
+
+        match input.getch() {
+            Some(b'w') => { player_dir = Dir::Up },
+            Some(b'a') => { player_dir = Dir::Left },
+            Some(b's') => { player_dir = Dir::Down },
+            Some(b'd') => { player_dir = Dir::Right },
+            Some(b' ') => { player_dir = Dir::Stop },
+            _ => {},
+        }
 
         match player_dir {
             Dir::Up => { player_y -= player_speed * dt },
