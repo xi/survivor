@@ -70,6 +70,7 @@ fn main() {
 
     while RUNNING.load(Ordering::Relaxed) {
         let time1 = time::Instant::now();
+        let dt = (time1 - time0).as_secs_f32();
 
         clear(&mut screen);
         circle(&mut screen, width as f32 / 2.0, height as f32 / 2.0, 15.0, [0x00, 0x00, 0xff]);
@@ -101,8 +102,8 @@ fn main() {
 
             let mut monster = &mut monsters[i];
             let d = (dx * dx + dy * dy).sqrt();
-            monster.x += dx / d * monster.speed * (time1 - time0).as_secs_f32();
-            monster.y += dy / d * monster.speed * (time1 - time0).as_secs_f32();
+            monster.x += dx / d * monster.speed * dt;
+            monster.y += dy / d * monster.speed * dt;
         }
         monsters.sort_unstable_by_key(|m| m.y as i32);
         for monster in monsters.iter() {
@@ -111,7 +112,7 @@ fn main() {
             circle(&mut screen, sx, sy, monster.size, [0xff, 0x00, 0x00]);
         }
 
-        if rng.gen_range(0, 3) == 0 {
+        if rng.gen_f32() < dt * 10.0 {
             let (spawn_x, spawn_y) = match rng.gen_range(0, 4) {
                 0 => (
                     rng.gen_range(0, width) as f32,
