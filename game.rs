@@ -113,21 +113,23 @@ fn main() {
         }
 
         if rng.gen_f32() < dt * 10.0 {
+            let size = 8.0 + rng.gen_f32() * 8.0;
+
             let (spawn_x, spawn_y) = match rng.gen_range(0, 4) {
                 0 => (
                     rng.gen_range(0, width) as f32,
-                    -10.0,
+                    -size,
                 ),
                 1 => (
-                    width as f32 + 10.0,
+                    width as f32 + size,
                     rng.gen_range(0, height) as f32,
                 ),
                 2 => (
                     rng.gen_range(0, width) as f32,
-                    height as f32 + 10.0,
+                    height as f32 + size,
                 ),
                 3 => (
-                    -10.0,
+                    -size,
                     rng.gen_range(0, height) as f32,
                 ),
                 _ => unreachable!(),
@@ -136,8 +138,8 @@ fn main() {
             monsters.push(Monster {
                 x: spawn_x + player_x - width as f32 / 2.0,
                 y: spawn_y + player_y - height as f32 / 2.0,
-                speed: 18.0,
-                size: 10.0,
+                speed: 2.0 + rng.gen_f32() * 50.0,
+                size: size,
             });
         }
 
