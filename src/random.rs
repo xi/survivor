@@ -1,6 +1,4 @@
-extern "C" {
-    fn getrandom(buf: *mut u8, buflen: usize, flags: u32) -> isize;
-}
+extern crate libc;
 
 pub struct Rng {
     state: u64,
@@ -10,7 +8,7 @@ impl Rng {
     pub fn new() -> Self {
         let mut bytes = [0; 8];
         unsafe {
-            getrandom(bytes.as_mut_ptr(), 8, 0x0001);
+            libc::getrandom(bytes.as_mut_ptr(), 8, 0x0001);
         }
         return Self { state: u64::from_ne_bytes(bytes) };
     }

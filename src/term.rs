@@ -1,14 +1,11 @@
-const TIOCGWINSZ: u64 = 21523;
-const Y_FACTOR: f32 = 1.4;
+extern crate libc;
 
-extern "C" {
-    fn ioctl(fd: i32, req: u64, ...) -> i64;
-}
+const Y_FACTOR: f32 = 1.4;
 
 fn get_terminal_size() -> (usize, usize) {
     let w = [0u16; 4];
     unsafe {
-        ioctl(1, TIOCGWINSZ, &w);
+        libc::ioctl(1, libc::TIOCGWINSZ, &w);
     }
     return (w[1] as usize, w[0] as usize);
 }
