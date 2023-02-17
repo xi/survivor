@@ -132,6 +132,9 @@ impl Screen {
                 }
                 print!("{}", block6(block));
             }
+            if y != self.height / 3 - 1 {
+                print!("\n");
+            }
         }
 
         println!("\x1b[0m");
