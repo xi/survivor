@@ -9,6 +9,8 @@ const TICK: time::Duration = time::Duration::from_millis(30);
 
 static RUNNING: AtomicBool = AtomicBool::new(true);
 
+enum Dir { Up, Right, Down, Left, Stop }
+
 fn on_ctrlc(_sig: i32) {
     RUNNING.fetch_and(false, Ordering::Relaxed);
 }
@@ -65,6 +67,8 @@ fn main() {
 
     let mut player_x = 0.0;
     let mut player_y = 0.0;
+    let mut player_speed = 30.0;
+    let mut player_dir = Dir::Up;
 
     signal::on_ctrlc(on_ctrlc);
 
@@ -76,6 +80,14 @@ fn main() {
 
         clear(&mut screen);
         circle(&mut screen, width / 2.0, height / 2.0, 15.0, [0x00, 0x00, 0xff]);
+
+        match player_dir {
+            Dir::Up => { player_y -= player_speed * dt },
+            Dir::Right => { player_x += player_speed * dt },
+            Dir::Down => { player_y += player_speed * dt },
+            Dir::Left => { player_x -= player_speed * dt },
+            Dir::Stop => {},
+        }
 
         for i in 0..monsters.len() {
             let monster = &monsters[i];
@@ -158,7 +170,7 @@ fn main() {
                 dx: 0.0,
                 dy: 0.0,
                 inertia: inertia / 20.0,
-                speed: 2.0 + rng.gen_f32() * 50.0,
+                speed: 2.0 + rng.gen_f32() * 30.0,
                 size: size,
             });
         }
