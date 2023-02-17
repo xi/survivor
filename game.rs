@@ -50,7 +50,10 @@ fn circle(screen: &mut term::Screen, cx: f32, cy: f32, r: f32, color: [u8; 3]) {
 struct Monster {
     x: f32,
     y: f32,
+    dx: f32,
+    dy: f32,
     speed: f32,
+    inertia: f32,
     size: f32,
 }
 
@@ -100,10 +103,24 @@ fn main() {
                 }
             }
 
-            let mut monster = &mut monsters[i];
             let d = (dx * dx + dy * dy).sqrt();
-            monster.x += dx / d * monster.speed * dt;
-            monster.y += dy / d * monster.speed * dt;
+            dx /= d;
+            dy /= d;
+            if dt < 0.000001 {
+                dx = monster.dx;
+                dy = monster.dy;
+            } else {
+                let inertia = monster.inertia.powf(dt);
+                // println!("{}", inertia);
+                dx = dx * (1.0 - inertia) + monster.dx * inertia;
+                dy = dy * (1.0 - inertia) + monster.dy * inertia;
+            }
+
+            let mut monster = &mut monsters[i];
+            monster.x += dx * monster.speed * dt;
+            monster.y += dy * monster.speed * dt;
+            monster.dx = dx;
+            monster.dy = dy;
         }
         monsters.sort_unstable_by_key(|m| m.y as i32);
         for monster in monsters.iter() {
@@ -113,7 +130,8 @@ fn main() {
         }
 
         if rng.gen_f32() < dt * 10.0 {
-            let size = 8.0 + rng.gen_f32() * 8.0;
+            let inertia = rng.gen_f32();
+            let size = 8.0 + inertia * 8.0;
 
             let (spawn_x, spawn_y) = match rng.gen_range(0, 4) {
                 0 => (
@@ -138,6 +156,9 @@ fn main() {
             monsters.push(Monster {
                 x: spawn_x + player_x - width as f32 / 2.0,
                 y: spawn_y + player_y - height as f32 / 2.0,
+                dx: 0.0,
+                dy: 0.0,
+                inertia: inertia / 20.0,
                 speed: 2.0 + rng.gen_f32() * 50.0,
                 size: size,
             });
