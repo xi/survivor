@@ -66,36 +66,43 @@ fn main() {
 
     signal::on_ctrlc(on_ctrlc);
 
+    let mut time0 = time::Instant::now();
+
     while RUNNING.load(Ordering::Relaxed) {
         let time1 = time::Instant::now();
 
         clear(&mut screen);
         circle(&mut screen, width as f32 / 2.0, height as f32 / 2.0, 15.0, [0x00, 0x00, 0xff]);
 
-        for monster in monsters.iter_mut() {
-            let dx = player_x - monster.x;
-            let dy = player_y - monster.y;
-            let d = (dx * dx + dy * dy).sqrt();
-            monster.x += dx / d * monster.speed / TICK.as_secs_f32();
-            monster.y += dy / d * monster.speed / TICK.as_secs_f32();
-        }
         for i in 0..monsters.len() {
+            let monster = &monsters[i];
+
+            let dxp = player_x - monster.x;
+            let dyp = player_y - monster.y;
+            let dp = (dxp * dxp + dyp * dyp).sqrt();
+
+            let mut dx = dxp / dp;
+            let mut dy = dyp / dp;
+
             for j in 0..monsters.len() {
                 if i != j {
-                    let monster = &monsters[i];
                     let other = &monsters[j];
-                    let dx = other.x - monster.x;
-                    let dy = other.y - monster.y;
-                    let d = (dx * dx + dy * dy).sqrt();
 
-                    if d < monster.size + other.size {
-                        let speed = monster.speed;
-                        let mut monster = &mut monsters[i];
-                        monster.x -= dx / d * speed / TICK.as_secs_f32();
-                        monster.y -= dy / d * speed / TICK.as_secs_f32();
+                    let dxm = other.x - monster.x;
+                    let dym = other.y - monster.y;
+                    let dm = (dxm * dxm + dym * dym).sqrt();
+
+                    if dm < monster.size + other.size {
+                        dx -= dxm / dm;
+                        dy -= dym / dm;
                     }
                 }
             }
+
+            let mut monster = &mut monsters[i];
+            let d = (dx * dx + dy * dy).sqrt();
+            monster.x += dx / d * monster.speed * (time1 - time0).as_secs_f32();
+            monster.y += dy / d * monster.speed * (time1 - time0).as_secs_f32();
         }
         monsters.sort_unstable_by_key(|m| m.y as i32);
         for monster in monsters.iter() {
@@ -128,7 +135,7 @@ fn main() {
             monsters.push(Monster {
                 x: spawn_x + player_x - width as f32 / 2.0,
                 y: spawn_y + player_y - height as f32 / 2.0,
-                speed: 0.02,
+                speed: 18.0,
                 size: 10.0,
             });
         }
@@ -141,6 +148,7 @@ fn main() {
         }
         let time3 = time::Instant::now();
         print!("{:?}", 1.0 / (time3 - time1).as_secs_f64());
+        time0 = time1;
     }
 }
 
