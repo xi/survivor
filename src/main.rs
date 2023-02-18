@@ -145,9 +145,9 @@ fn main() {
             Dir::Stop => {},
         }
 
-        enemies = enemies.into_iter().filter(|m| {
-            (m.y - player_y).abs() < height
-            && (m.x - player_x).abs() < width
+        enemies = enemies.into_iter().filter(|e| {
+            (e.y - player_y).abs() < height
+            && (e.x - player_x).abs() < width
         }).collect();
 
         for enemy in enemies.iter_mut() {
