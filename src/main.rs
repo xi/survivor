@@ -1,10 +1,10 @@
 mod term;
 mod input;
 mod random;
-mod sprites;
 mod enemies;
 
 extern crate libc;
+extern crate sprites;
 
 use std::{thread, time};
 use std::sync::atomic::{AtomicBool, Ordering};
