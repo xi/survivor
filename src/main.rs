@@ -1,6 +1,7 @@
 mod term;
 mod input;
 mod random;
+mod sprites;
 
 extern crate libc;
 
@@ -11,6 +12,7 @@ const TICK: time::Duration = time::Duration::from_millis(30);
 
 static RUNNING: AtomicBool = AtomicBool::new(true);
 
+#[derive(PartialEq)]
 enum Dir { Up, Right, Down, Left, Stop }
 
 fn quit(_sig: i32) {
@@ -26,25 +28,27 @@ fn fill(screen: &mut term::Screen, color: [u8; 3]) {
 }
 
 fn clear(screen: &mut term::Screen) {
-    fill(screen, [0, 0, 0]);
+    fill(screen, [0x33, 0x88, 0x22]);
 }
 
-fn circle(screen: &mut term::Screen, cx: f32, cy: f32, r: f32, color: [u8; 3]) {
-    let r2 = r * r;
+fn sprite(screen: &mut term::Screen, cx: f32, cy: f32, sprite: sprites::Sprite, invert: bool) {
+    let x0 = screen.convert_x(cx) - sprites::WIDTH as i64 / 2;
+    let y0 = screen.convert_y(cy) + sprites::WIDTH as i64 / 2 - sprites::HEIGHT as i64;
 
-    let y0 = screen.convert_y(cy - r).unwrap_or(0);
-    let x0 = screen.convert_x(cx - r).unwrap_or(0);
-
-    let y1 = screen.convert_y(cy + r).unwrap_or(screen.height - 1) + 1;
-    let x1 = screen.convert_x(cx + r).unwrap_or(screen.width - 1) + 1;
-
-    for y in y0..y1 {
-        let dy = screen.iconvert_y(y) - cy;
-        let y2 = dy * dy;
-        for x in x0..x1 {
-            let dx = screen.iconvert_x(x) - cx;
-            if dx * dx + y2 <= r2 {
-                screen.set(x, y, color);
+    for dy in 0..sprites::HEIGHT {
+        let y = y0 + dy as i64;
+        if y < 0 || y >= screen.height as i64 {
+            continue;
+        }
+        for dx in 0..sprites::WIDTH {
+            let x = x0 + dx as i64;
+            if x < 0 || x >= screen.width as i64 {
+                continue;
+            }
+            let cx = if invert { sprites::WIDTH - dx - 1 } else { dx };
+            let c = sprite[dy][cx];
+            if c != sprite[0][0] {
+                screen.set(x as usize, y as usize, c);
             }
         }
     }
@@ -66,11 +70,14 @@ fn main() {
     let mut rng = random::Rng::new();
     let width = screen.iconvert_x(screen.width);
     let height = screen.iconvert_y(screen.height);
+    let sprite_width = screen.iconvert_x(sprites::WIDTH);
+    let sprite_height = screen.iconvert_y(sprites::HEIGHT);
     let mut monsters: Vec<Monster> = vec![];
 
     let mut player_x = 0.0;
     let mut player_y = 0.0;
-    let mut player_dir = Dir::Up;
+    let mut player_dir = Dir::Stop;
+    let mut player_face = Dir::Right;
     let player_speed = 30.0;
 
     unsafe {
@@ -84,17 +91,17 @@ fn main() {
         let dt = (time1 - time0).as_secs_f32();
 
         clear(&mut screen);
-        circle(&mut screen, width / 2.0, height / 2.0, 15.0, [0x00, 0x00, 0xff]);
+        sprite(&mut screen, width / 2.0, height / 2.0, sprites::HERO, player_face == Dir::Left);
 
         match input.getch() {
             Some(b'w') => { player_dir = Dir::Up },
             Some(b'A') => { player_dir = Dir::Up },
-            Some(b'a') => { player_dir = Dir::Left },
-            Some(b'D') => { player_dir = Dir::Left },
+            Some(b'a') => { player_dir = Dir::Left; player_face = Dir::Left },
+            Some(b'D') => { player_dir = Dir::Left; player_face = Dir::Left },
             Some(b's') => { player_dir = Dir::Down },
             Some(b'B') => { player_dir = Dir::Down },
-            Some(b'd') => { player_dir = Dir::Right },
-            Some(b'C') => { player_dir = Dir::Right },
+            Some(b'd') => { player_dir = Dir::Right; player_face = Dir::Right },
+            Some(b'C') => { player_dir = Dir::Right; player_face = Dir::Right },
             Some(b' ') => { player_dir = Dir::Stop },
             Some(b'q') => { quit(0) },
             _ => {},
@@ -141,7 +148,6 @@ fn main() {
                 dy = monster.dy;
             } else {
                 let inertia = monster.inertia.powf(dt);
-                // println!("{}", inertia);
                 dx = dx * (1.0 - inertia) + monster.dx * inertia;
                 dy = dy * (1.0 - inertia) + monster.dy * inertia;
             }
@@ -156,28 +162,25 @@ fn main() {
         for monster in monsters.iter() {
             let sx = monster.x - player_x + width / 2.0;
             let sy = monster.y - player_y + height / 2.0;
-            circle(&mut screen, sx, sy, monster.size, [0xff, 0x00, 0x00]);
+            sprite(&mut screen, sx, sy, sprites::SKELETON, monster.x > player_x);
         }
 
         if rng.gen_f32() < dt * 10.0 {
-            let inertia = rng.gen_f32();
-            let size = 8.0 + inertia * 8.0;
-
             let (spawn_x, spawn_y) = match rng.gen_range(0, 4) {
                 0 => (
                     rng.gen_f32() * width,
-                    -size,
+                    -sprite_height,
                 ),
                 1 => (
-                    width + size,
+                    width + sprite_width,
                     rng.gen_f32() * height,
                 ),
                 2 => (
                     rng.gen_f32() * width,
-                    height + size,
+                    height + sprite_height,
                 ),
                 3 => (
-                    -size,
+                    -sprite_width,
                     rng.gen_f32() * height,
                 ),
                 _ => unreachable!(),
@@ -188,9 +191,9 @@ fn main() {
                 y: spawn_y + player_y - height / 2.0,
                 dx: 0.0,
                 dy: 0.0,
-                inertia: inertia / 20.0,
-                speed: 2.0 + rng.gen_f32() * 30.0,
-                size: size,
+                inertia: 0.1,
+                speed: 10.0,
+                size: 10.0,
             });
         }
 

@@ -138,26 +138,12 @@ impl Screen {
         println!("\x1b[0m");
     }
 
-    pub fn convert_x(&self, x: f32) -> Option<usize> {
-        if x < 0.0 {
-            return None;
-        }
-        let u = x as usize;
-        if u >= self.width {
-            return None;
-        }
-        return Some(u);
+    pub fn convert_x(&self, x: f32) -> i64 {
+        return x as i64;
     }
 
-    pub fn convert_y(&self, y: f32) -> Option<usize> {
-        if y < 0.0 {
-            return None;
-        }
-        let u = (y / Y_FACTOR) as usize;
-        if u >= self.height {
-            return None;
-        }
-        return Some(u);
+    pub fn convert_y(&self, y: f32) -> i64 {
+        return (y / Y_FACTOR) as i64;
     }
 
     pub fn iconvert_x(&self, x: usize) -> f32 {
