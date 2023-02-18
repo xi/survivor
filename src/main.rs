@@ -145,17 +145,6 @@ fn main() {
         let time1 = time::Instant::now();
         let dt = (time1 - time0).as_secs_f32();
 
-        clear(&mut screen);
-        circle(&mut screen, width / 2.0, height / 2.0, player_attack_radius, [0x00, 0xff, 0x00]);
-
-        for diamond in diamonds.iter() {
-            let sx = diamond.x - player_x + width / 2.0;
-            let sy = diamond.y - player_y + height / 2.0;
-            sprite(&mut screen, sx, sy, &sprites::DIAMOND, false);
-        }
-
-        sprite(&mut screen, width / 2.0, height / 2.0, &sprites::HERO, player_face == Dir::Left);
-
         match input.getch() {
             Some(b'w') => { player_dir = Dir::Up },
             Some(b'A') => { player_dir = Dir::Up },
@@ -170,6 +159,7 @@ fn main() {
             _ => {},
         }
 
+        // move
         match player_dir {
             Dir::Up => { player_y -= player_speed * dt },
             Dir::Right => { player_x += player_speed * dt },
@@ -177,54 +167,6 @@ fn main() {
             Dir::Left => { player_x -= player_speed * dt },
             Dir::Stop => {},
         }
-
-        enemies = enemies.into_iter().filter(|e| {
-            (e.y - player_y).abs() < height
-            && (e.x - player_x).abs() < width
-        }).collect();
-        while player_xp >= player_next_level {
-            player_last_level = player_next_level;
-            player_next_level *= 2;
-
-            match rng.gen_range(0, 7) {
-                PERK_POWER => { player_attack *= 1.1; },
-                PERK_HEALTH => { player_health_max *= 1.1; },
-                PERK_SPEED => { player_speed *= 1.1; },
-                PERK_RADIUS => { player_attack_radius *= 1.1; },
-                PERK_HEAL => { player_health = player_health_max; },
-                PERK_RECOVER => { player_health_recover += 0.2 },
-                PERK_ATTRACT => { player_diamond_radius *= 1.1; },
-                _ => unreachable!(),
-            }
-        }
-
-        for enemy in enemies.iter_mut() {
-            let dx = player_x - enemy.x;
-            let dy = player_y - enemy.y;
-
-            let size = enemy.t.size + player_size;
-            if dx * dx + dy * 2.0 * dy * 2.0 < size * size {
-                player_health -= enemy.t.power * dt;
-            }
-
-            if dx * dx + dy * dy < player_attack_radius * player_attack_radius {
-                enemy.health -= player_attack * dt;
-            }
-        }
-
-        player_health = (player_health + player_health_recover * dt).min(player_health_max);
-
-        diamonds = diamonds.into_iter().filter(|diamond| {
-            let dx = player_x - diamond.x;
-            let dy = player_y - diamond.y;
-            let d = (dx * dx + dy * dy).sqrt();
-            if d < player_diamond_radius {
-                player_xp += 1;
-                return false;
-            } else{
-                return true;
-            }
-        }).collect();
 
         for i in 0..enemies.len() {
             let enemy = &enemies[i];
@@ -260,28 +202,77 @@ fn main() {
             enemy.y += dy * enemy.t.speed * dt;
         }
 
+        // recover
+        player_health = (player_health + player_health_recover * dt).min(player_health_max);
+
+        // despawn
+        enemies = enemies.into_iter().filter(|e| {
+            (e.y - player_y).abs() < height
+            && (e.x - player_x).abs() < width
+        }).collect();
+
+        // interact with enemies
+        for enemy in enemies.iter_mut() {
+            let dx = player_x - enemy.x;
+            let dy = player_y - enemy.y;
+
+            let size = enemy.t.size + player_size;
+            if dx * dx + dy * 2.0 * dy * 2.0 < size * size {
+                player_health -= enemy.t.power * dt;
+            }
+
+            if dx * dx + dy * dy < player_attack_radius * player_attack_radius {
+                enemy.health -= player_attack * dt;
+            }
+        }
+
+        enemies = enemies.into_iter().filter(|enemy| {
+            if enemy.health <= 0.0 {
+                diamonds.push(Diamond {
+                    x: enemy.x,
+                    y: enemy.y,
+                });
+                return false;
+            } else {
+                return true;
+            }
+        }).collect();
+
         if player_health < 0.0 {
             println!("\nyou died (score: {})", player_xp);
             break;
         }
 
-        for enemy in enemies.iter() {
-            if enemy.health < 0.0 {
-                diamonds.push(Diamond {
-                    x: enemy.x,
-                    y: enemy.y,
-                });
+        // interact with diamonds
+        diamonds = diamonds.into_iter().filter(|diamond| {
+            let dx = player_x - diamond.x;
+            let dy = player_y - diamond.y;
+            let d = (dx * dx + dy * dy).sqrt();
+            if d < player_diamond_radius {
+                player_xp += 1;
+                return false;
+            } else{
+                return true;
+            }
+        }).collect();
+
+        while player_xp >= player_next_level {
+            player_last_level = player_next_level;
+            player_next_level *= 2;
+
+            match rng.gen_range(0, 7) {
+                PERK_POWER => { player_attack *= 1.1; },
+                PERK_HEALTH => { player_health_max *= 1.1; },
+                PERK_SPEED => { player_speed *= 1.1; },
+                PERK_RADIUS => { player_attack_radius *= 1.1; },
+                PERK_HEAL => { player_health = player_health_max; },
+                PERK_RECOVER => { player_health_recover += 0.2 },
+                PERK_ATTRACT => { player_diamond_radius *= 1.1; },
+                _ => unreachable!(),
             }
         }
-        enemies = enemies.into_iter().filter(|e| e.health > 0.0).collect();
 
-        enemies.sort_unstable_by_key(|m| m.y as i32);
-        for enemy in enemies.iter() {
-            let sx = enemy.x - player_x + width / 2.0;
-            let sy = enemy.y - player_y + height / 2.0;
-            sprite(&mut screen, sx, sy, enemy.t.sprite, enemy.x > player_x);
-        }
-
+        // spawn
         if rng.gen_f32() < dt * 2.0 {
             let (spawn_x, spawn_y) = match rng.gen_range(0, 4) {
                 0 => (
@@ -311,12 +302,32 @@ fn main() {
             i_enemy += 1;
         }
 
+        // render
+        clear(&mut screen);
+        circle(&mut screen, width / 2.0, height / 2.0, player_attack_radius, [0x00, 0xff, 0x00]);
+
+        for diamond in diamonds.iter() {
+            let sx = diamond.x - player_x + width / 2.0;
+            let sy = diamond.y - player_y + height / 2.0;
+            sprite(&mut screen, sx, sy, &sprites::DIAMOND, false);
+        }
+
+        sprite(&mut screen, width / 2.0, height / 2.0, &sprites::HERO, player_face == Dir::Left);
+
+        enemies.sort_unstable_by_key(|e| e.y as i32);
+        for enemy in enemies.iter() {
+            let sx = enemy.x - player_x + width / 2.0;
+            let sy = enemy.y - player_y + height / 2.0;
+            sprite(&mut screen, sx, sy, enemy.t.sprite, enemy.x > player_x);
+        }
+
         bar(&mut screen, 0, (player_xp - player_last_level) as f32 / (player_next_level - player_last_level) as f32, [0x00, 0x00, 0xff]);
         let h = screen.height;
         bar(&mut screen, h - 3, player_health / player_health_max, [0xff, 0x00, 0x00]);
 
         screen.render();
 
+        // sleep
         let time2 = time::Instant::now();
         if TICK > time2 - time1 {
             thread::sleep(TICK - (time2 - time1));
