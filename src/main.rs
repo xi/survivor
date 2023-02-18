@@ -99,7 +99,6 @@ fn bar(screen: &mut term::Screen, y: usize, value: f32, color: [u8; 3]) {
 struct Diamond {
     pub x: f32,
     pub y: f32,
-    pub xp: u64,
 }
 
 fn main() {
@@ -214,7 +213,7 @@ fn main() {
             let dy = player_y - diamond.y;
             let d = (dx * dx + dy * dy).sqrt();
             if d < player_diamond_radius {
-                player_xp += diamond.xp;
+                player_xp += 1;
                 return false;
             } else{
                 return true;
@@ -265,7 +264,6 @@ fn main() {
                 diamonds.push(Diamond {
                     x: enemy.x,
                     y: enemy.y,
-                    xp: enemy.t.xp,
                 });
             }
         }

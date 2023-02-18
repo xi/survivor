@@ -7,7 +7,6 @@ pub struct EnemyType {
     pub size: f32,
     pub health: f32,
     pub power: f32,
-    pub xp: u64,
     pub sprite: &'static sprites::Sprite,
 }
 
@@ -23,7 +22,6 @@ const SNAKE: EnemyType = EnemyType {
     size: 8.0,
     health: 5.0,
     power: 5.0,
-    xp: 1,
     sprite: &sprites::SNAKE,
 };
 
@@ -32,7 +30,6 @@ const SKELETON: EnemyType = EnemyType {
     size: 9.0,
     health: 10.0,
     power: 10.0,
-    xp: 2,
     sprite: &sprites::SKELETON,
 };
 
@@ -41,7 +38,6 @@ const SKELETON2: EnemyType = EnemyType {
     size: 9.0,
     health: 20.0,
     power: 20.0,
-    xp: 2,
     sprite: &sprites::SKELETON2,
 };
 
@@ -50,7 +46,6 @@ const BAT: EnemyType = EnemyType {
     size: 8.0,
     health: 4.0,
     power: 4.0,
-    xp: 1,
     sprite: &sprites::BAT,
 };
 
@@ -59,7 +54,6 @@ const BAT2: EnemyType = EnemyType {
     size: 9.0,
     health: 30.0,
     power: 5.0,
-    xp: 2,
     sprite: &sprites::BAT2,
 };
 
@@ -68,7 +62,6 @@ const ZOMBIE: EnemyType = EnemyType {
     size: 9.0,
     health: 30.0,
     power: 20.0,
-    xp: 1,
     sprite: &sprites::ZOMBIE,
 };
 
@@ -77,7 +70,6 @@ const EYE: EnemyType = EnemyType {
     size: 7.0,
     health: 20.0,
     power: 20.0,
-    xp: 2,
     sprite: &sprites::EYE,
 };
 
@@ -86,7 +78,6 @@ const GHOST: EnemyType = EnemyType {
     size: 9.0,
     health: 15.0,
     power: 15.0,
-    xp: 1,
     sprite: &sprites::GHOST,
 };
 
@@ -95,7 +86,6 @@ const MUMMY: EnemyType = EnemyType {
     size: 9.0,
     health: 30.0,
     power: 25.0,
-    xp: 1,
     sprite: &sprites::MUMMY,
 };
 
@@ -104,7 +94,6 @@ const HOOD: EnemyType = EnemyType {
     size: 9.0,
     health: 30.0,
     power: 40.0,
-    xp: 1,
     sprite: &sprites::HOOD,
 };
 
@@ -113,7 +102,6 @@ const PLANTGUY: EnemyType = EnemyType {
     size: 9.0,
     health: 50.0,
     power: 30.0,
-    xp: 1,
     sprite: &sprites::PLANTGUY,
 };
 
@@ -122,7 +110,6 @@ const CRAWL: EnemyType = EnemyType {
     size: 9.0,
     health: 60.0,
     power: 40.0,
-    xp: 3,
     sprite: &sprites::CRAWL,
 };
 
@@ -131,7 +118,6 @@ const SHADOW: EnemyType = EnemyType {
     size: 9.0,
     health: 50.0,
     power: 50.0,
-    xp: 2,
     sprite: &sprites::SHADOW,
 };
 
