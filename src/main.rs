@@ -88,6 +88,12 @@ fn bar(screen: &mut term::Screen, y: usize, value: f32, color: [u8; 3]) {
     }
 }
 
+struct Diamond {
+    pub x: f32,
+    pub y: f32,
+    pub xp: u64,
+}
+
 fn main() {
     let input = input::Input::new();
     let mut screen = term::Screen::new();
@@ -97,6 +103,7 @@ fn main() {
     let sprite_width = screen.iconvert_x(sprites::WIDTH);
     let sprite_height = screen.iconvert_y(sprites::HEIGHT);
     let mut enemies: Vec<enemies::Enemy> = vec![];
+    let mut diamonds: Vec<Diamond> = vec![];
 
     let mut player_x = 0.0;
     let mut player_y = 0.0;
@@ -121,6 +128,13 @@ fn main() {
 
         clear(&mut screen);
         circle(&mut screen, width / 2.0, height / 2.0, player_attack_radius, [0x00, 0xff, 0x00]);
+
+        for diamond in diamonds.iter() {
+            let sx = diamond.x - player_x + width / 2.0;
+            let sy = diamond.y - player_y + height / 2.0;
+            sprite(&mut screen, sx, sy, sprites::DIAMOND, false);
+        }
+
         sprite(&mut screen, width / 2.0, height / 2.0, sprites::HERO, player_face == Dir::Left);
 
         match input.getch() {
@@ -213,11 +227,16 @@ fn main() {
             break;
         }
 
-        for enemy in enemies.iter_mut() {
+        for enemy in enemies.iter() {
             if enemy.health < 0.0 {
-                enemy.speed = 0.0;
+                diamonds.push(Diamond {
+                    x: enemy.x,
+                    y: enemy.y,
+                    xp: enemy.xp,
+                });
             }
         }
+        enemies = enemies.into_iter().filter(|e| e.health > 0.0).collect();
 
         enemies.sort_unstable_by_key(|m| m.y as i32);
         for enemy in enemies.iter() {
