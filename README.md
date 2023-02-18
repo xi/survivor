@@ -7,7 +7,7 @@ inspired by Vampire Survivors.
 
 The player controls an automatically attacking character, with the goal to
 survive for as long as possible. Killed enemies drop diamonds that can be
-collected to gain XP. When the blue XP bar at the bottom of the screen is full
+collected to gain XP. When the blue XP bar at the top of the screen is full
 the player receives a random perk:
 
 -	Damage is increased by 10%
