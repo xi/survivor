@@ -264,8 +264,8 @@ fn main() {
         diamonds = diamonds.into_iter().filter(|diamond| {
             let dx = player.x - diamond.x;
             let dy = player.y - diamond.y;
-            let d = (dx * dx + dy * dy).sqrt();
-            if d < player.diamond_radius {
+            let d = dx * dx + dy * dy;
+            if d < player.diamond_radius * player.diamond_radius {
                 player.xp += 1;
                 return false;
             } else{
