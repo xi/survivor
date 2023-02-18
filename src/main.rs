@@ -54,6 +54,27 @@ fn sprite(screen: &mut term::Screen, cx: f32, cy: f32, sprite: sprites::Sprite, 
     }
 }
 
+fn circle(screen: &mut term::Screen, cx: f32, cy: f32, r: f32, color: [u8; 3]) {
+    let r2 = r * r;
+
+    let y0 = screen.convert_y(cy - r).max(0) as usize;
+    let x0 = screen.convert_x(cx - r).max(0) as usize;
+
+    let y1 = screen.convert_y(cy + r).min(screen.height as i64 - 1) as usize;
+    let x1 = screen.convert_x(cx + r).min(screen.width as i64 - 1) as usize;
+
+    for y in y0..=y1 {
+        let dy = screen.iconvert_y(y) - cy;
+        let y2 = dy * dy;
+        for x in x0..=x1 {
+            let dx = screen.iconvert_x(x) - cx;
+            if dx * dx + y2 <= r2 {
+                screen.set(x, y, color);
+            }
+        }
+    }
+}
+
 fn bar(screen: &mut term::Screen, y: usize, value: f32, color: [u8; 3]) {
     let black = [0x00, 0x00, 0x00];
 
@@ -110,6 +131,7 @@ fn main() {
         let dt = (time1 - time0).as_secs_f32();
 
         clear(&mut screen);
+        circle(&mut screen, width / 2.0, height / 2.0, player_attack_radius, [0x00, 0xff, 0x00]);
         sprite(&mut screen, width / 2.0, height / 2.0, sprites::HERO, player_face == Dir::Left);
 
         match input.getch() {
