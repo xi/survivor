@@ -9,7 +9,7 @@ extern crate sprites;
 use std::{thread, time};
 use std::sync::atomic::{AtomicBool, Ordering};
 
-const TICK: time::Duration = time::Duration::from_millis(30);
+const TICK: time::Duration = time::Duration::from_millis(33);
 
 const PERK_POWER: usize = 0;
 const PERK_HEALTH: usize = 1;
