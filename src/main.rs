@@ -13,7 +13,7 @@ static RUNNING: AtomicBool = AtomicBool::new(true);
 
 enum Dir { Up, Right, Down, Left, Stop }
 
-fn on_ctrlc(_sig: i32) {
+fn quit(_sig: i32) {
     RUNNING.fetch_and(false, Ordering::Relaxed);
 }
 
@@ -74,7 +74,7 @@ fn main() {
     let player_speed = 30.0;
 
     unsafe {
-        libc::signal(libc::SIGINT, on_ctrlc as usize);
+        libc::signal(libc::SIGINT, quit as usize);
     }
 
     let mut time0 = time::Instant::now();
@@ -88,10 +88,15 @@ fn main() {
 
         match input.getch() {
             Some(b'w') => { player_dir = Dir::Up },
+            Some(b'A') => { player_dir = Dir::Up },
             Some(b'a') => { player_dir = Dir::Left },
+            Some(b'D') => { player_dir = Dir::Left },
             Some(b's') => { player_dir = Dir::Down },
+            Some(b'B') => { player_dir = Dir::Down },
             Some(b'd') => { player_dir = Dir::Right },
+            Some(b'C') => { player_dir = Dir::Right },
             Some(b' ') => { player_dir = Dir::Stop },
+            Some(b'q') => { quit(0) },
             _ => {},
         }
 

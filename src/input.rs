@@ -37,11 +37,23 @@ impl Input {
         }
     }
 
-    pub fn getch(&self) -> Option<u8> {
+    fn _getch(&self) -> Option<u8> {
         let mut stdin = std::io::stdin();
         let mut buf = [0];
-        stdin.read(&mut buf[..]).ok()?;
-        return if buf[0] == 0 { None } else { Some(buf[0]) };
+        let count = stdin.read(&mut buf[..]).ok()?;
+        return if count == 0 { None } else { Some(buf[0]) };
+    }
+
+    pub fn getch(&self) -> Option<u8> {
+        let c0 = self._getch()?;
+
+        if c0 == 27 {
+            self._getch()?;
+            let c2 = self._getch()?;
+            return Some(c2);
+        } else {
+            return Some(c0);
+        }
     }
 }
 
