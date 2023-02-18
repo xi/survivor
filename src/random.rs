@@ -10,7 +10,9 @@ impl Rng {
         unsafe {
             libc::getrandom(bytes.as_mut_ptr(), 8, 0x0001);
         }
-        return Self { state: u64::from_ne_bytes(bytes) };
+        return Self {
+            state: u64::from_ne_bytes(bytes),
+        };
     }
 
     fn gen(&mut self) -> usize {

@@ -29,7 +29,7 @@ impl Input {
 
     fn cbreak(&self) {
         let mut t = self.termios.clone();
-        t.c_lflag &= !(libc::ICANON|libc::ECHO);
+        t.c_lflag &= !(libc::ICANON | libc::ECHO);
         t.c_cc[libc::VMIN] = 0;
         t.c_cc[libc::VTIME] = 0;
         unsafe {

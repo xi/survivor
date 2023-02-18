@@ -1,13 +1,13 @@
-mod term;
+mod enemies;
 mod input;
 mod random;
-mod enemies;
+mod term;
 
 extern crate libc;
 extern crate sprites;
 
-use std::{thread, time};
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::{thread, time};
 
 const TICK: time::Duration = time::Duration::from_millis(33);
 const MAX_ENEMIES: usize = 100;
@@ -23,7 +23,13 @@ const PERK_ATTRACT: usize = 6;
 static RUNNING: AtomicBool = AtomicBool::new(true);
 
 #[derive(PartialEq)]
-enum Dir { Up, Right, Down, Left, Stop }
+enum Dir {
+    Up,
+    Right,
+    Down,
+    Left,
+    Stop,
+}
 
 fn quit(_sig: i32) {
     RUNNING.fetch_and(false, Ordering::Relaxed);
@@ -73,10 +79,16 @@ fn sprite(screen: &mut term::Screen, cx: f32, cy: f32, sprite: &sprites::Sprite,
 fn circle(screen: &mut term::Screen, cx: f32, cy: f32, r: f32, color: [u8; 3]) {
     let r2 = r * r;
 
-    let y0 = screen.convert_y(cy - r).max(0).min(screen.height as i64 - 1) as usize;
+    let y0 = screen
+        .convert_y(cy - r)
+        .max(0)
+        .min(screen.height as i64 - 1) as usize;
     let x0 = screen.convert_x(cx - r).max(0).min(screen.width as i64 - 1) as usize;
 
-    let y1 = screen.convert_y(cy + r).max(0).min(screen.height as i64 - 1) as usize;
+    let y1 = screen
+        .convert_y(cy + r)
+        .max(0)
+        .min(screen.height as i64 - 1) as usize;
     let x1 = screen.convert_x(cx + r).max(0).min(screen.width as i64 - 1) as usize;
 
     for y in y0..=y1 {
@@ -124,7 +136,6 @@ struct Player {
     pub xp: usize,
     pub last_level: usize,
     pub next_level: usize,
-
 }
 
 fn main() {
@@ -168,22 +179,28 @@ fn main() {
         let dt = (time1 - time0).as_secs_f32();
 
         match input.getch() {
-            Some(b'w' | b'A') => { player.dir = Dir::Up },
-            Some(b'a' | b'D') => { player.dir = Dir::Left; player.face = Dir::Left },
-            Some(b's' | b'B') => { player.dir = Dir::Down },
-            Some(b'd' | b'C') => { player.dir = Dir::Right; player.face = Dir::Right },
-            Some(b' ') => { player.dir = Dir::Stop },
-            Some(b'q') => { quit(0) },
-            _ => {},
+            Some(b'w' | b'A') => player.dir = Dir::Up,
+            Some(b'a' | b'D') => {
+                player.dir = Dir::Left;
+                player.face = Dir::Left
+            }
+            Some(b's' | b'B') => player.dir = Dir::Down,
+            Some(b'd' | b'C') => {
+                player.dir = Dir::Right;
+                player.face = Dir::Right
+            }
+            Some(b' ') => player.dir = Dir::Stop,
+            Some(b'q') => quit(0),
+            _ => {}
         }
 
         // move
         match player.dir {
-            Dir::Up => { player.y -= player.speed * dt },
-            Dir::Right => { player.x += player.speed * dt },
-            Dir::Down => { player.y += player.speed * dt },
-            Dir::Left => { player.x -= player.speed * dt },
-            Dir::Stop => {},
+            Dir::Up => player.y -= player.speed * dt,
+            Dir::Right => player.x += player.speed * dt,
+            Dir::Down => player.y += player.speed * dt,
+            Dir::Left => player.x -= player.speed * dt,
+            Dir::Stop => {}
         }
 
         for i in 0..enemies.len() {
@@ -224,10 +241,10 @@ fn main() {
         player.health = (player.health + player.health_recover * dt).min(player.health_max);
 
         // despawn
-        enemies = enemies.into_iter().filter(|e| {
-            (e.y - player.y).abs() < height
-            && (e.x - player.x).abs() < width
-        }).collect();
+        enemies = enemies
+            .into_iter()
+            .filter(|e| (e.y - player.y).abs() < height && (e.x - player.x).abs() < width)
+            .collect();
 
         // interact with enemies
         for enemy in enemies.iter_mut() {
@@ -244,17 +261,20 @@ fn main() {
             }
         }
 
-        enemies = enemies.into_iter().filter(|enemy| {
-            if enemy.health <= 0.0 {
-                diamonds.push(Diamond {
-                    x: enemy.x,
-                    y: enemy.y,
-                });
-                return false;
-            } else {
-                return true;
-            }
-        }).collect();
+        enemies = enemies
+            .into_iter()
+            .filter(|enemy| {
+                if enemy.health <= 0.0 {
+                    diamonds.push(Diamond {
+                        x: enemy.x,
+                        y: enemy.y,
+                    });
+                    return false;
+                } else {
+                    return true;
+                }
+            })
+            .collect();
 
         if player.health < 0.0 {
             println!("\nyou died (score: {})", player.xp);
@@ -262,30 +282,45 @@ fn main() {
         }
 
         // interact with diamonds
-        diamonds = diamonds.into_iter().filter(|diamond| {
-            let dx = player.x - diamond.x;
-            let dy = player.y - diamond.y;
-            let d = dx * dx + dy * dy;
-            if d < player.diamond_radius * player.diamond_radius {
-                player.xp += 1;
-                return false;
-            } else{
-                return true;
-            }
-        }).collect();
+        diamonds = diamonds
+            .into_iter()
+            .filter(|diamond| {
+                let dx = player.x - diamond.x;
+                let dy = player.y - diamond.y;
+                let d = dx * dx + dy * dy;
+                if d < player.diamond_radius * player.diamond_radius {
+                    player.xp += 1;
+                    return false;
+                } else {
+                    return true;
+                }
+            })
+            .collect();
 
         while player.xp >= player.next_level {
             player.last_level = player.next_level;
             player.next_level *= 2;
 
             match rng.gen_range(0, 7) {
-                PERK_POWER => { player.power *= 1.1; },
-                PERK_HEALTH => { player.health_max *= 1.1; },
-                PERK_SPEED => { player.speed *= 1.1; },
-                PERK_RADIUS => { player.damage_radius *= 1.1; },
-                PERK_HEAL => { player.health = player.health_max; },
-                PERK_RECOVER => { player.health_recover += 0.2 },
-                PERK_ATTRACT => { player.diamond_radius *= 1.1; },
+                PERK_POWER => {
+                    player.power *= 1.1;
+                }
+                PERK_HEALTH => {
+                    player.health_max *= 1.1;
+                }
+                PERK_SPEED => {
+                    player.speed *= 1.1;
+                }
+                PERK_RADIUS => {
+                    player.damage_radius *= 1.1;
+                }
+                PERK_HEAL => {
+                    player.health = player.health_max;
+                }
+                PERK_RECOVER => player.health_recover += 0.2,
+                PERK_ATTRACT => {
+                    player.diamond_radius *= 1.1;
+                }
                 _ => unreachable!(),
             }
         }
@@ -293,22 +328,10 @@ fn main() {
         // spawn
         if enemies.len() < MAX_ENEMIES && rng.gen_f32() < dt * 2.0 {
             let (spawn_x, spawn_y) = match rng.gen_range(0, 4) {
-                0 => (
-                    rng.gen_f32() * width,
-                    -sprite_height,
-                ),
-                1 => (
-                    width + sprite_width,
-                    rng.gen_f32() * height,
-                ),
-                2 => (
-                    rng.gen_f32() * width,
-                    height + sprite_height,
-                ),
-                3 => (
-                    -sprite_width,
-                    rng.gen_f32() * height,
-                ),
+                0 => (rng.gen_f32() * width, -sprite_height),
+                1 => (width + sprite_width, rng.gen_f32() * height),
+                2 => (rng.gen_f32() * width, height + sprite_height),
+                3 => (-sprite_width, rng.gen_f32() * height),
                 _ => unreachable!(),
             };
 
@@ -322,7 +345,13 @@ fn main() {
 
         // render
         clear(&mut screen);
-        circle(&mut screen, width / 2.0, height / 2.0, player.damage_radius, [0x00, 0xff, 0x00]);
+        circle(
+            &mut screen,
+            width / 2.0,
+            height / 2.0,
+            player.damage_radius,
+            [0x00, 0xff, 0x00],
+        );
 
         for diamond in diamonds.iter() {
             let sx = diamond.x - player.x + width / 2.0;
@@ -334,7 +363,13 @@ fn main() {
         let mut player_rendered = false;
         for enemy in enemies.iter() {
             if !player_rendered && enemy.y > player.y {
-                sprite(&mut screen, width / 2.0, height / 2.0, &sprites::HERO, player.face == Dir::Left);
+                sprite(
+                    &mut screen,
+                    width / 2.0,
+                    height / 2.0,
+                    &sprites::HERO,
+                    player.face == Dir::Left,
+                );
                 player_rendered = true;
             }
 
@@ -343,12 +378,28 @@ fn main() {
             sprite(&mut screen, sx, sy, enemy.t.sprite, enemy.x > player.x);
         }
         if !player_rendered {
-            sprite(&mut screen, width / 2.0, height / 2.0, &sprites::HERO, player.face == Dir::Left);
+            sprite(
+                &mut screen,
+                width / 2.0,
+                height / 2.0,
+                &sprites::HERO,
+                player.face == Dir::Left,
+            );
         }
 
-        bar(&mut screen, 0, (player.xp - player.last_level) as f32 / (player.next_level - player.last_level) as f32, [0x00, 0x00, 0xff]);
+        bar(
+            &mut screen,
+            0,
+            (player.xp - player.last_level) as f32 / (player.next_level - player.last_level) as f32,
+            [0x00, 0x00, 0xff],
+        );
         let h = screen.height;
-        bar(&mut screen, h - 3, player.health / player.health_max, [0xff, 0x00, 0x00]);
+        bar(
+            &mut screen,
+            h - 3,
+            player.health / player.health_max,
+            [0xff, 0x00, 0x00],
+        );
 
         screen.render();
 

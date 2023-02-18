@@ -28,7 +28,7 @@ fn set_fg(color: [u8; 3]) {
 
 fn block6(block: u32) -> char {
     if block == 0b000000 {
-        return ' '
+        return ' ';
     } else if block < 0b010101 {
         return char::from_u32(0x1FB00 + block - 1).unwrap();
     } else if block == 0b010101 {
@@ -61,7 +61,10 @@ fn get_block(colors: [[u8; 3]; 6]) -> (u32, [u8; 3], [u8; 3]) {
     let mut lights = vec![];
     let mut darks = vec![];
 
-    let lightness: Vec<u8> = colors.iter().map(|c| (c[0] >> 3) + (c[1] >> 1) + (c[2] >> 5)).collect();
+    let lightness: Vec<u8> = colors
+        .iter()
+        .map(|c| (c[0] >> 3) + (c[1] >> 1) + (c[2] >> 5))
+        .collect();
     let mean: u8 = lightness.iter().map(|l| l / 6).sum();
 
     for i in 0..6 {
@@ -97,7 +100,7 @@ impl Screen {
             width: width,
             height: height,
             pixels: vec![vec![[0, 0, 0]; width]; height],
-        }
+        };
     }
 
     pub fn set(&mut self, x: usize, y: usize, color: [u8; 3]) {
