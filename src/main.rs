@@ -74,6 +74,8 @@ struct Monster {
     speed: f32,
     inertia: f32,
     size: f32,
+    health: f32,
+    attack: f32,
 }
 
 fn main() {
@@ -91,7 +93,10 @@ fn main() {
     let mut player_dir = Dir::Stop;
     let mut player_face = Dir::Right;
     let player_speed = 30.0;
-    let player_health = 0.8;
+    let mut player_health = 50.0;
+    let player_health_max = 50.0;
+    let player_attack = 20.0;
+    let player_attack_radius = 40.0;
     let player_exp = 0.3;
 
     unsafe {
@@ -133,6 +138,20 @@ fn main() {
             (m.y - player_y).abs() < height
             && (m.x - player_x).abs() < width
         }).collect();
+
+        for monster in monsters.iter_mut() {
+            let dx = player_x - monster.x;
+            let dy = player_y - monster.y;
+            let d = (dx * dx + dy * dy).sqrt();
+
+            if d < monster.size {
+                player_health -= monster.attack * dt;
+            }
+
+            if d < player_attack_radius {
+                monster.health -= player_attack * dt;
+            }
+        }
 
         for i in 0..monsters.len() {
             let monster = &monsters[i];
@@ -178,6 +197,17 @@ fn main() {
             monster.dy = dy;
         }
 
+        if player_health < 0.0 {
+            println!("\nyou died");
+            break;
+        }
+
+        for monster in monsters.iter_mut() {
+            if monster.health < 0.0 {
+                monster.speed = 0.0;
+            }
+        }
+
         monsters.sort_unstable_by_key(|m| m.y as i32);
         for monster in monsters.iter() {
             let sx = monster.x - player_x + width / 2.0;
@@ -214,12 +244,14 @@ fn main() {
                 inertia: 0.1,
                 speed: 10.0,
                 size: 10.0,
+                health: 10.0,
+                attack: 5.0,
             });
         }
 
         bar(&mut screen, 0, player_exp, [0x00, 0x00, 0xff]);
         let h = screen.height;
-        bar(&mut screen, h - 3, player_health, [0xff, 0x00, 0x00]);
+        bar(&mut screen, h - 3, player_health / player_health_max, [0xff, 0x00, 0x00]);
 
         screen.render();
 
