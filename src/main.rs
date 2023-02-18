@@ -167,14 +167,10 @@ fn main() {
         let dt = (time1 - time0).as_secs_f32();
 
         match input.getch() {
-            Some(b'w') => { player.dir = Dir::Up },
-            Some(b'A') => { player.dir = Dir::Up },
-            Some(b'a') => { player.dir = Dir::Left; player.face = Dir::Left },
-            Some(b'D') => { player.dir = Dir::Left; player.face = Dir::Left },
-            Some(b's') => { player.dir = Dir::Down },
-            Some(b'B') => { player.dir = Dir::Down },
-            Some(b'd') => { player.dir = Dir::Right; player.face = Dir::Right },
-            Some(b'C') => { player.dir = Dir::Right; player.face = Dir::Right },
+            Some(b'w' | b'A') => { player.dir = Dir::Up },
+            Some(b'a' | b'D') => { player.dir = Dir::Left; player.face = Dir::Left },
+            Some(b's' | b'B') => { player.dir = Dir::Down },
+            Some(b'd' | b'C') => { player.dir = Dir::Right; player.face = Dir::Right },
             Some(b' ') => { player.dir = Dir::Stop },
             Some(b'q') => { quit(0) },
             _ => {},
