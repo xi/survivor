@@ -48,9 +48,9 @@ I had wanted to create a graphical action game for the terminal for a long
 time. This kind of game felt like a good fit for the particular restrictions
 that come with the terminal.
 
-Also, Vampire Survivors takes a full minute to load and the full saturates the
+Also, Vampire Survivors takes a full minute to load and then full saturates the
 CPU on my laptop, even in the menu. I wanted to prove to myself that that is
-note necessary.
+not necessary.
 
 ### Why does the character not stop when I release the movement keys?
 
