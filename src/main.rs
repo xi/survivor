@@ -11,6 +11,14 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 const TICK: time::Duration = time::Duration::from_millis(30);
 
+const PERK_POWER: usize = 0;
+const PERK_HEALTH: usize = 1;
+const PERK_SPEED: usize = 2;
+const PERK_RADIUS: usize = 3;
+const PERK_HEAL: usize = 4;
+const PERK_RECOVER: usize = 5;
+const PERK_ATTRACT: usize = 6;
+
 static RUNNING: AtomicBool = AtomicBool::new(true);
 
 #[derive(PartialEq)]
@@ -110,16 +118,17 @@ fn main() {
     let mut player_y = 0.0;
     let mut player_dir = Dir::Stop;
     let mut player_face = Dir::Right;
-    let player_speed = 30.0;
+    let mut player_speed = 30.0;
     let player_size = 9.0;
     let mut player_health = 50.0;
-    let player_health_max = 50.0;
-    let player_attack = 10.0;
-    let player_attack_radius = 30.0;
+    let mut player_health_max = 50.0;
+    let mut player_health_recover = 0.0;
+    let mut player_attack = 10.0;
+    let mut player_attack_radius = 30.0;
     let mut player_xp = 0;
     let mut player_last_level = 0;
     let mut player_next_level = 10;
-    let player_diamond_radius = 15.0;
+    let mut player_diamond_radius = 15.0;
 
     unsafe {
         libc::signal(libc::SIGINT, quit as usize);
@@ -171,6 +180,17 @@ fn main() {
         while player_xp >= player_next_level {
             player_last_level = player_next_level;
             player_next_level *= 2;
+
+            match rng.gen_range(0, 7) {
+                PERK_POWER => { player_attack *= 1.1; },
+                PERK_HEALTH => { player_health_max *= 1.1; },
+                PERK_SPEED => { player_speed *= 1.1; },
+                PERK_RADIUS => { player_attack_radius *= 1.1; },
+                PERK_HEAL => { player_health = player_health_max; },
+                PERK_RECOVER => { player_health_recover += 0.2 },
+                PERK_ATTRACT => { player_diamond_radius *= 1.1; },
+                _ => unreachable!(),
+            }
         }
 
         for enemy in enemies.iter_mut() {
@@ -186,6 +206,8 @@ fn main() {
                 enemy.health -= player_attack * dt;
             }
         }
+
+        player_health = (player_health + player_health_recover * dt).min(player_health_max);
 
         diamonds = diamonds.into_iter().filter(|diamond| {
             let dx = player_x - diamond.x;
