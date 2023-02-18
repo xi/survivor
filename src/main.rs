@@ -114,7 +114,10 @@ fn main() {
     let player_health_max = 50.0;
     let player_attack = 20.0;
     let player_attack_radius = 40.0;
-    let player_exp = 0.3;
+    let mut player_xp = 0;
+    let mut player_last_level = 0;
+    let mut player_next_level = 10;
+    let player_diamond_radius = 15.0;
 
     unsafe {
         libc::signal(libc::SIGINT, quit as usize);
@@ -163,6 +166,10 @@ fn main() {
             (e.y - player_y).abs() < height
             && (e.x - player_x).abs() < width
         }).collect();
+        while player_xp >= player_next_level {
+            player_last_level = player_next_level;
+            player_next_level *= 2;
+        }
 
         for enemy in enemies.iter_mut() {
             let dx = player_x - enemy.x;
@@ -177,6 +184,18 @@ fn main() {
                 enemy.health -= player_attack * dt;
             }
         }
+
+        diamonds = diamonds.into_iter().filter(|diamond| {
+            let dx = player_x - diamond.x;
+            let dy = player_y - diamond.y;
+            let d = (dx * dx + dy * dy).sqrt();
+            if d < player_diamond_radius {
+                player_xp += diamond.xp;
+                return false;
+            } else{
+                return true;
+            }
+        }).collect();
 
         for i in 0..enemies.len() {
             let enemy = &enemies[i];
@@ -272,7 +291,7 @@ fn main() {
             ));
         }
 
-        bar(&mut screen, 0, player_exp, [0x00, 0x00, 0xff]);
+        bar(&mut screen, 0, (player_xp - player_last_level) as f32 / (player_next_level - player_last_level) as f32, [0x00, 0x00, 0xff]);
         let h = screen.height;
         bar(&mut screen, h - 3, player_health / player_health_max, [0xff, 0x00, 0x00]);
 
