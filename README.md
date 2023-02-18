@@ -81,3 +81,4 @@ there is a good chance that it will improve if you reduce the window size.
 -	Draw character in sprite order
 -	More enemy waves
 -	Adapt to terminal size change
+-	Sound
