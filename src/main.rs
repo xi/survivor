@@ -244,7 +244,7 @@ fn main() {
         }
 
         if player_health < 0.0 {
-            println!("\nyou died");
+            println!("\nyou died (score: {})", player_xp);
             break;
         }
 
