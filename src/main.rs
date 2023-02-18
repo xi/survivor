@@ -54,6 +54,18 @@ fn sprite(screen: &mut term::Screen, cx: f32, cy: f32, sprite: sprites::Sprite, 
     }
 }
 
+fn bar(screen: &mut term::Screen, y: usize, value: f32, color: [u8; 3]) {
+    let black = [0x00, 0x00, 0x00];
+
+    for x in 0..screen.width {
+        let fx = x as f32 / screen.width as f32;
+        let c = if fx <= value { color } else { black };
+        for dy in 0..3 {
+            screen.set(x, y + dy, c);
+        }
+    }
+}
+
 struct Monster {
     x: f32,
     y: f32,
@@ -79,6 +91,8 @@ fn main() {
     let mut player_dir = Dir::Stop;
     let mut player_face = Dir::Right;
     let player_speed = 30.0;
+    let player_health = 0.8;
+    let player_exp = 0.3;
 
     unsafe {
         libc::signal(libc::SIGINT, quit as usize);
@@ -196,6 +210,10 @@ fn main() {
                 size: 10.0,
             });
         }
+
+        bar(&mut screen, 0, player_exp, [0x00, 0x00, 0xff]);
+        let h = screen.height;
+        bar(&mut screen, h - 3, player_health, [0xff, 0x00, 0x00]);
 
         screen.render();
 
