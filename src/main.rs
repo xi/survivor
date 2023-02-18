@@ -66,11 +66,11 @@ fn sprite(screen: &mut term::Screen, cx: f32, cy: f32, sprite: &sprites::Sprite,
 fn circle(screen: &mut term::Screen, cx: f32, cy: f32, r: f32, color: [u8; 3]) {
     let r2 = r * r;
 
-    let y0 = screen.convert_y(cy - r).max(0) as usize;
-    let x0 = screen.convert_x(cx - r).max(0) as usize;
+    let y0 = screen.convert_y(cy - r).max(0).min(screen.height as i64 - 1) as usize;
+    let x0 = screen.convert_x(cx - r).max(0).min(screen.width as i64 - 1) as usize;
 
-    let y1 = screen.convert_y(cy + r).min(screen.height as i64 - 1) as usize;
-    let x1 = screen.convert_x(cx + r).min(screen.width as i64 - 1) as usize;
+    let y1 = screen.convert_y(cy + r).max(0).min(screen.height as i64 - 1) as usize;
+    let x1 = screen.convert_x(cx + r).max(0).min(screen.width as i64 - 1) as usize;
 
     for y in y0..=y1 {
         let dy = screen.iconvert_y(y) - cy;
