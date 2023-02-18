@@ -249,20 +249,10 @@ fn main() {
             let d = (dx * dx + dy * dy).sqrt();
             dx /= d;
             dy /= d;
-            if dt < 0.000001 {
-                dx = enemy.dx;
-                dy = enemy.dy;
-            } else {
-                let inertia = enemy.t.inertia.powf(dt);
-                dx = dx * (1.0 - inertia) + enemy.dx * inertia;
-                dy = dy * (1.0 - inertia) + enemy.dy * inertia;
-            }
 
             let mut enemy = &mut enemies[i];
             enemy.x += dx * enemy.t.speed * dt;
             enemy.y += dy * enemy.t.speed * dt;
-            enemy.dx = dx;
-            enemy.dy = dy;
         }
 
         if player_health < 0.0 {

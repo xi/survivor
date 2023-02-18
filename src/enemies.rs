@@ -3,7 +3,6 @@
 extern crate sprites;
 
 pub struct EnemyType {
-    pub inertia: f32,
     pub speed: f32,
     pub size: f32,
     pub health: f32,
@@ -15,14 +14,11 @@ pub struct EnemyType {
 pub struct Enemy {
     pub x: f32,
     pub y: f32,
-    pub dx: f32,
-    pub dy: f32,
     pub health: f32,
     pub t: &'static EnemyType,
 }
 
 const SNAKE: EnemyType = EnemyType {
-    inertia: 0.1,
     speed: 15.0,
     size: 8.0,
     health: 5.0,
@@ -32,7 +28,6 @@ const SNAKE: EnemyType = EnemyType {
 };
 
 const SKELETON: EnemyType = EnemyType {
-    inertia: 0.1,
     speed: 15.0,
     size: 9.0,
     health: 10.0,
@@ -42,7 +37,6 @@ const SKELETON: EnemyType = EnemyType {
 };
 
 const SKELETON2: EnemyType = EnemyType {
-    inertia: 0.1,
     speed: 15.0,
     size: 9.0,
     health: 20.0,
@@ -52,7 +46,6 @@ const SKELETON2: EnemyType = EnemyType {
 };
 
 const BAT: EnemyType = EnemyType {
-    inertia: 0.1,
     speed: 25.0,
     size: 8.0,
     health: 4.0,
@@ -62,7 +55,6 @@ const BAT: EnemyType = EnemyType {
 };
 
 const BAT2: EnemyType = EnemyType {
-    inertia: 0.1,
     speed: 25.0,
     size: 9.0,
     health: 30.0,
@@ -72,7 +64,6 @@ const BAT2: EnemyType = EnemyType {
 };
 
 const ZOMBIE: EnemyType = EnemyType {
-    inertia: 0.1,
     speed: 5.0,
     size: 9.0,
     health: 30.0,
@@ -82,7 +73,6 @@ const ZOMBIE: EnemyType = EnemyType {
 };
 
 const EYE: EnemyType = EnemyType {
-    inertia: 0.1,
     speed: 12.0,
     size: 7.0,
     health: 20.0,
@@ -92,7 +82,6 @@ const EYE: EnemyType = EnemyType {
 };
 
 const GHOST: EnemyType = EnemyType {
-    inertia: 0.1,
     speed: 18.0,
     size: 9.0,
     health: 15.0,
@@ -102,7 +91,6 @@ const GHOST: EnemyType = EnemyType {
 };
 
 const MUMMY: EnemyType = EnemyType {
-    inertia: 0.1,
     speed: 8.0,
     size: 9.0,
     health: 30.0,
@@ -112,7 +100,6 @@ const MUMMY: EnemyType = EnemyType {
 };
 
 const HOOD: EnemyType = EnemyType {
-    inertia: 0.1,
     speed: 14.0,
     size: 9.0,
     health: 30.0,
@@ -122,7 +109,6 @@ const HOOD: EnemyType = EnemyType {
 };
 
 const PLANTGUY: EnemyType = EnemyType {
-    inertia: 0.1,
     speed: 10.0,
     size: 9.0,
     health: 50.0,
@@ -132,7 +118,6 @@ const PLANTGUY: EnemyType = EnemyType {
 };
 
 const CRAWL: EnemyType = EnemyType {
-    inertia: 0.1,
     speed: 5.0,
     size: 9.0,
     health: 60.0,
@@ -142,7 +127,6 @@ const CRAWL: EnemyType = EnemyType {
 };
 
 const SHADOW: EnemyType = EnemyType {
-    inertia: 0.1,
     speed: 20.0,
     size: 9.0,
     health: 50.0,
@@ -215,8 +199,6 @@ pub fn get_enemy(x: f32, y: f32, i: usize) -> Enemy {
     return Enemy {
         x: x,
         y: y,
-        dx: 0.0,
-        dy: 0.0,
         health: t.health,
         t: t,
     };
