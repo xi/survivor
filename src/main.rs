@@ -10,6 +10,7 @@ use std::{thread, time};
 use std::sync::atomic::{AtomicBool, Ordering};
 
 const TICK: time::Duration = time::Duration::from_millis(33);
+const MAX_ENEMIES: usize = 100;
 
 const PERK_POWER: usize = 0;
 const PERK_HEALTH: usize = 1;
@@ -290,7 +291,7 @@ fn main() {
         }
 
         // spawn
-        if rng.gen_f32() < dt * 2.0 {
+        if enemies.len() < MAX_ENEMIES && rng.gen_f32() < dt * 2.0 {
             let (spawn_x, spawn_y) = match rng.gen_range(0, 4) {
                 0 => (
                     rng.gen_f32() * width,
