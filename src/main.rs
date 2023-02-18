@@ -104,16 +104,18 @@ fn main() {
     let sprite_height = screen.iconvert_y(sprites::HEIGHT);
     let mut enemies: Vec<enemies::Enemy> = vec![];
     let mut diamonds: Vec<Diamond> = vec![];
+    let mut i_enemy = 0;
 
     let mut player_x = 0.0;
     let mut player_y = 0.0;
     let mut player_dir = Dir::Stop;
     let mut player_face = Dir::Right;
     let player_speed = 30.0;
+    let player_size = 9.0;
     let mut player_health = 50.0;
     let player_health_max = 50.0;
-    let player_attack = 20.0;
-    let player_attack_radius = 40.0;
+    let player_attack = 10.0;
+    let player_attack_radius = 30.0;
     let mut player_xp = 0;
     let mut player_last_level = 0;
     let mut player_next_level = 10;
@@ -176,8 +178,8 @@ fn main() {
             let dy = player_y - enemy.y;
             let d = (dx * dx + dy * dy).sqrt();
 
-            if d < enemy.size {
-                player_health -= enemy.power * dt;
+            if d < enemy.t.size + player_size {
+                player_health -= enemy.t.power * dt;
             }
 
             if d < player_attack_radius {
@@ -215,7 +217,7 @@ fn main() {
                     let dym = other.y - enemy.y;
                     let dm = (dxm * dxm + dym * dym).sqrt();
 
-                    if dm < enemy.size + other.size {
+                    if dm < enemy.t.size + other.t.size {
                         dx -= dxm / dm;
                         dy -= dym / dm;
                     }
@@ -229,14 +231,14 @@ fn main() {
                 dx = enemy.dx;
                 dy = enemy.dy;
             } else {
-                let inertia = enemy.inertia.powf(dt);
+                let inertia = enemy.t.inertia.powf(dt);
                 dx = dx * (1.0 - inertia) + enemy.dx * inertia;
                 dy = dy * (1.0 - inertia) + enemy.dy * inertia;
             }
 
             let mut enemy = &mut enemies[i];
-            enemy.x += dx * enemy.speed * dt;
-            enemy.y += dy * enemy.speed * dt;
+            enemy.x += dx * enemy.t.speed * dt;
+            enemy.y += dy * enemy.t.speed * dt;
             enemy.dx = dx;
             enemy.dy = dy;
         }
@@ -251,7 +253,7 @@ fn main() {
                 diamonds.push(Diamond {
                     x: enemy.x,
                     y: enemy.y,
-                    xp: enemy.xp,
+                    xp: enemy.t.xp,
                 });
             }
         }
@@ -261,10 +263,10 @@ fn main() {
         for enemy in enemies.iter() {
             let sx = enemy.x - player_x + width / 2.0;
             let sy = enemy.y - player_y + height / 2.0;
-            sprite(&mut screen, sx, sy, enemy.sprite, enemy.x > player_x);
+            sprite(&mut screen, sx, sy, enemy.t.sprite, enemy.x > player_x);
         }
 
-        if rng.gen_f32() < dt * 10.0 {
+        if rng.gen_f32() < dt * 2.0 {
             let (spawn_x, spawn_y) = match rng.gen_range(0, 4) {
                 0 => (
                     rng.gen_f32() * width,
@@ -285,10 +287,12 @@ fn main() {
                 _ => unreachable!(),
             };
 
-            enemies.push(enemies::skeleton(
+            enemies.push(enemies::get_enemy(
                 spawn_x + player_x - width / 2.0,
                 spawn_y + player_y - height / 2.0,
+                i_enemy,
             ));
+            i_enemy += 1;
         }
 
         bar(&mut screen, 0, (player_xp - player_last_level) as f32 / (player_next_level - player_last_level) as f32, [0x00, 0x00, 0xff]);
