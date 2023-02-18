@@ -2,6 +2,7 @@ mod term;
 mod input;
 mod random;
 mod sprites;
+mod enemies;
 
 extern crate libc;
 
@@ -87,18 +88,6 @@ fn bar(screen: &mut term::Screen, y: usize, value: f32, color: [u8; 3]) {
     }
 }
 
-struct Monster {
-    x: f32,
-    y: f32,
-    dx: f32,
-    dy: f32,
-    speed: f32,
-    inertia: f32,
-    size: f32,
-    health: f32,
-    attack: f32,
-}
-
 fn main() {
     let input = input::Input::new();
     let mut screen = term::Screen::new();
@@ -107,7 +96,7 @@ fn main() {
     let height = screen.iconvert_y(screen.height);
     let sprite_width = screen.iconvert_x(sprites::WIDTH);
     let sprite_height = screen.iconvert_y(sprites::HEIGHT);
-    let mut monsters: Vec<Monster> = vec![];
+    let mut enemies: Vec<enemies::Enemy> = vec![];
 
     let mut player_x = 0.0;
     let mut player_y = 0.0;
@@ -156,44 +145,44 @@ fn main() {
             Dir::Stop => {},
         }
 
-        monsters = monsters.into_iter().filter(|m| {
+        enemies = enemies.into_iter().filter(|m| {
             (m.y - player_y).abs() < height
             && (m.x - player_x).abs() < width
         }).collect();
 
-        for monster in monsters.iter_mut() {
-            let dx = player_x - monster.x;
-            let dy = player_y - monster.y;
+        for enemy in enemies.iter_mut() {
+            let dx = player_x - enemy.x;
+            let dy = player_y - enemy.y;
             let d = (dx * dx + dy * dy).sqrt();
 
-            if d < monster.size {
-                player_health -= monster.attack * dt;
+            if d < enemy.size {
+                player_health -= enemy.power * dt;
             }
 
             if d < player_attack_radius {
-                monster.health -= player_attack * dt;
+                enemy.health -= player_attack * dt;
             }
         }
 
-        for i in 0..monsters.len() {
-            let monster = &monsters[i];
+        for i in 0..enemies.len() {
+            let enemy = &enemies[i];
 
-            let dxp = player_x - monster.x;
-            let dyp = player_y - monster.y;
+            let dxp = player_x - enemy.x;
+            let dyp = player_y - enemy.y;
             let dp = (dxp * dxp + dyp * dyp).sqrt();
 
             let mut dx = dxp / dp;
             let mut dy = dyp / dp;
 
-            for j in 0..monsters.len() {
+            for j in 0..enemies.len() {
                 if i != j {
-                    let other = &monsters[j];
+                    let other = &enemies[j];
 
-                    let dxm = other.x - monster.x;
-                    let dym = other.y - monster.y;
+                    let dxm = other.x - enemy.x;
+                    let dym = other.y - enemy.y;
                     let dm = (dxm * dxm + dym * dym).sqrt();
 
-                    if dm < monster.size + other.size {
+                    if dm < enemy.size + other.size {
                         dx -= dxm / dm;
                         dy -= dym / dm;
                     }
@@ -204,19 +193,19 @@ fn main() {
             dx /= d;
             dy /= d;
             if dt < 0.000001 {
-                dx = monster.dx;
-                dy = monster.dy;
+                dx = enemy.dx;
+                dy = enemy.dy;
             } else {
-                let inertia = monster.inertia.powf(dt);
-                dx = dx * (1.0 - inertia) + monster.dx * inertia;
-                dy = dy * (1.0 - inertia) + monster.dy * inertia;
+                let inertia = enemy.inertia.powf(dt);
+                dx = dx * (1.0 - inertia) + enemy.dx * inertia;
+                dy = dy * (1.0 - inertia) + enemy.dy * inertia;
             }
 
-            let mut monster = &mut monsters[i];
-            monster.x += dx * monster.speed * dt;
-            monster.y += dy * monster.speed * dt;
-            monster.dx = dx;
-            monster.dy = dy;
+            let mut enemy = &mut enemies[i];
+            enemy.x += dx * enemy.speed * dt;
+            enemy.y += dy * enemy.speed * dt;
+            enemy.dx = dx;
+            enemy.dy = dy;
         }
 
         if player_health < 0.0 {
@@ -224,17 +213,17 @@ fn main() {
             break;
         }
 
-        for monster in monsters.iter_mut() {
-            if monster.health < 0.0 {
-                monster.speed = 0.0;
+        for enemy in enemies.iter_mut() {
+            if enemy.health < 0.0 {
+                enemy.speed = 0.0;
             }
         }
 
-        monsters.sort_unstable_by_key(|m| m.y as i32);
-        for monster in monsters.iter() {
-            let sx = monster.x - player_x + width / 2.0;
-            let sy = monster.y - player_y + height / 2.0;
-            sprite(&mut screen, sx, sy, sprites::SKELETON, monster.x > player_x);
+        enemies.sort_unstable_by_key(|m| m.y as i32);
+        for enemy in enemies.iter() {
+            let sx = enemy.x - player_x + width / 2.0;
+            let sy = enemy.y - player_y + height / 2.0;
+            sprite(&mut screen, sx, sy, sprites::SKELETON, enemy.x > player_x);
         }
 
         if rng.gen_f32() < dt * 10.0 {
@@ -258,17 +247,10 @@ fn main() {
                 _ => unreachable!(),
             };
 
-            monsters.push(Monster {
-                x: spawn_x + player_x - width / 2.0,
-                y: spawn_y + player_y - height / 2.0,
-                dx: 0.0,
-                dy: 0.0,
-                inertia: 0.1,
-                speed: 10.0,
-                size: 10.0,
-                health: 10.0,
-                attack: 5.0,
-            });
+            enemies.push(enemies::skeleton(
+                spawn_x + player_x - width / 2.0,
+                spawn_y + player_y - height / 2.0,
+            ));
         }
 
         bar(&mut screen, 0, player_exp, [0x00, 0x00, 0xff]);
@@ -286,4 +268,3 @@ fn main() {
         time0 = time1;
     }
 }
-
