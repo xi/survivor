@@ -312,10 +312,16 @@ fn main() {
             sprite(&mut screen, sx, sy, &sprites::DIAMOND, false);
         }
 
+        enemies.sort_unstable_by_key(|e| e.y as i32);
+        for enemy in enemies.iter().filter(|e| e.y < player_y) {
+            let sx = enemy.x - player_x + width / 2.0;
+            let sy = enemy.y - player_y + height / 2.0;
+            sprite(&mut screen, sx, sy, enemy.t.sprite, enemy.x > player_x);
+        }
+
         sprite(&mut screen, width / 2.0, height / 2.0, &sprites::HERO, player_face == Dir::Left);
 
-        enemies.sort_unstable_by_key(|e| e.y as i32);
-        for enemy in enemies.iter() {
+        for enemy in enemies.iter().filter(|e| e.y >= player_y) {
             let sx = enemy.x - player_x + width / 2.0;
             let sy = enemy.y - player_y + height / 2.0;
             sprite(&mut screen, sx, sy, enemy.t.sprite, enemy.x > player_x);

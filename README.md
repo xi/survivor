@@ -78,7 +78,6 @@ there is a good chance that it will improve if you reduce the window size.
 -	Make the code more portable
 -	Improve balancing
 -	Add tarain
--	Draw character in sprite order
 -	More enemy waves
 -	Adapt to terminal size change
 -	Sound
