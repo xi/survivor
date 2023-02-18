@@ -46,13 +46,19 @@ fn sprite(screen: &mut term::Screen, cx: f32, cy: f32, sprite: &sprites::Sprite,
 
     for dy in 0..sprites::HEIGHT {
         let y = y0 + dy as i64;
-        if y < 0 || y >= screen.height as i64 {
+        if y < 0 {
             continue;
+        }
+        if y >= screen.height as i64 {
+            break;
         }
         for dx in 0..sprites::WIDTH {
             let x = x0 + dx as i64;
-            if x < 0 || x >= screen.width as i64 {
+            if x < 0 {
                 continue;
+            }
+            if x >= screen.width as i64 {
+                break;
             }
             let cx = if invert { sprites::WIDTH - dx - 1 } else { dx };
             let c = sprite[dy][cx];
