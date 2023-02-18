@@ -13,8 +13,8 @@ with open(sys.argv[1]) as fh:
 	assert _next(lines) == f'{WIDTH} {HEIGHT}'
 	assert _next(lines) == '255'
 	print(f'pub const SPRITE: Sprite = [')
+	print('    [')
 	for y in range(HEIGHT):
-		print('    [')
 		for x in range(WIDTH):
 			r = int(_next(lines), 10)
 			g = int(_next(lines), 10)
