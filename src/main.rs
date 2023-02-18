@@ -129,6 +129,11 @@ fn main() {
             Dir::Stop => {},
         }
 
+        monsters = monsters.into_iter().filter(|m| {
+            (m.y - player_y).abs() < height
+            && (m.x - player_x).abs() < width
+        }).collect();
+
         for i in 0..monsters.len() {
             let monster = &monsters[i];
 
@@ -172,6 +177,7 @@ fn main() {
             monster.dx = dx;
             monster.dy = dy;
         }
+
         monsters.sort_unstable_by_key(|m| m.y as i32);
         for monster in monsters.iter() {
             let sx = monster.x - player_x + width / 2.0;
