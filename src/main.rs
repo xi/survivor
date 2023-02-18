@@ -195,13 +195,13 @@ fn main() {
         for enemy in enemies.iter_mut() {
             let dx = player_x - enemy.x;
             let dy = player_y - enemy.y;
-            let d = (dx * dx + dy * dy).sqrt();
 
-            if d < enemy.t.size + player_size {
+            let size = enemy.t.size + player_size;
+            if dx * dx + dy * 2.0 * dy * 2.0 < size * size {
                 player_health -= enemy.t.power * dt;
             }
 
-            if d < player_attack_radius {
+            if dx * dx + dy * dy < player_attack_radius * player_attack_radius {
                 enemy.health -= player_attack * dt;
             }
         }
