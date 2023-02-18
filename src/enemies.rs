@@ -1,5 +1,7 @@
 // https://vampire-survivors.fandom.com/wiki/Enemies
 
+extern crate sprites;
+
 pub struct Enemy {
     pub x: f32,
     pub y: f32,
@@ -11,6 +13,7 @@ pub struct Enemy {
     pub health: f32,
     pub power: f32,
     pub xp: u64,
+    pub sprite: &'static sprites::Sprite,
 }
 
 pub fn skeleton(x: f32, y: f32) -> Enemy {
@@ -25,5 +28,6 @@ pub fn skeleton(x: f32, y: f32) -> Enemy {
         health: 10.0,
         power: 5.0,
         xp: 1,
+        sprite: &sprites::SKELETON,
     };
 }

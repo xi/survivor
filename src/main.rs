@@ -32,7 +32,7 @@ fn clear(screen: &mut term::Screen) {
     fill(screen, [0x33, 0x88, 0x22]);
 }
 
-fn sprite(screen: &mut term::Screen, cx: f32, cy: f32, sprite: sprites::Sprite, invert: bool) {
+fn sprite(screen: &mut term::Screen, cx: f32, cy: f32, sprite: &sprites::Sprite, invert: bool) {
     let x0 = screen.convert_x(cx) - sprites::WIDTH as i64 / 2;
     let y0 = screen.convert_y(cy) + sprites::WIDTH as i64 / 2 - sprites::HEIGHT as i64;
 
@@ -135,10 +135,10 @@ fn main() {
         for diamond in diamonds.iter() {
             let sx = diamond.x - player_x + width / 2.0;
             let sy = diamond.y - player_y + height / 2.0;
-            sprite(&mut screen, sx, sy, sprites::DIAMOND, false);
+            sprite(&mut screen, sx, sy, &sprites::DIAMOND, false);
         }
 
-        sprite(&mut screen, width / 2.0, height / 2.0, sprites::HERO, player_face == Dir::Left);
+        sprite(&mut screen, width / 2.0, height / 2.0, &sprites::HERO, player_face == Dir::Left);
 
         match input.getch() {
             Some(b'w') => { player_dir = Dir::Up },
@@ -261,7 +261,7 @@ fn main() {
         for enemy in enemies.iter() {
             let sx = enemy.x - player_x + width / 2.0;
             let sy = enemy.y - player_y + height / 2.0;
-            sprite(&mut screen, sx, sy, sprites::SKELETON, enemy.x > player_x);
+            sprite(&mut screen, sx, sy, enemy.sprite, enemy.x > player_x);
         }
 
         if rng.gen_f32() < dt * 10.0 {
