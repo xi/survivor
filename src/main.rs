@@ -70,8 +70,8 @@ fn main() {
 
     let mut player_x = 0.0;
     let mut player_y = 0.0;
-    let mut player_speed = 30.0;
     let mut player_dir = Dir::Up;
+    let player_speed = 30.0;
 
     unsafe {
         libc::signal(libc::SIGINT, on_ctrlc as usize);
