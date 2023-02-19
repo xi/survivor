@@ -122,65 +122,36 @@ const SHADOW: EnemyType = EnemyType {
 };
 
 pub fn get_enemy(x: f32, y: f32, i: usize) -> Enemy {
-    let n = 50;
+    let waves = [
+        vec![&SNAKE, &SNAKE],
+        vec![&SNAKE, &SKELETON],
+        vec![&SNAKE, &SKELETON],
+        vec![&BAT],
+        vec![&ZOMBIE],
+        vec![&ZOMBIE],
+        vec![&BAT, &SKELETON],
+        vec![&BAT, &SKELETON],
+        vec![&BAT, &EYE],
+        vec![&GHOST],
+        vec![&GHOST],
+        vec![&BAT2, &ZOMBIE],
+        vec![&BAT2, &ZOMBIE],
+        vec![&MUMMY, &ZOMBIE],
+        vec![&MUMMY, &ZOMBIE],
+        vec![&HOOD],
+        vec![&HOOD],
+        vec![&HOOD],
+        vec![&SNAKE, &PLANTGUY],
+        vec![&SNAKE, &PLANTGUY],
+        vec![&SKELETON2, &CRAWL],
+        vec![&SKELETON2, &CRAWL],
+        vec![&CRAWL],
+        vec![&SHADOW],
+        vec![&SHADOW],
+    ];
 
-    let t: &EnemyType = if i < 1 * n {
-        &SNAKE
-    } else if i < 3 * n {
-        if i % 2 == 0 {
-            &SNAKE
-        } else {
-            &SKELETON
-        }
-    } else if i < 4 * n {
-        &BAT
-    } else if i < 6 * n {
-        &ZOMBIE
-    } else if i < 8 * n {
-        if i % 2 == 0 {
-            &BAT
-        } else {
-            &SKELETON
-        }
-    } else if i < 9 * n {
-        if i % 2 == 0 {
-            &BAT
-        } else {
-            &EYE
-        }
-    } else if i < 11 * n {
-        &GHOST
-    } else if i < 13 * n {
-        if i % 2 == 0 {
-            &BAT2
-        } else {
-            &ZOMBIE
-        }
-    } else if i < 15 * n {
-        if i % 2 == 0 {
-            &ZOMBIE
-        } else {
-            &MUMMY
-        }
-    } else if i < 18 * n {
-        &HOOD
-    } else if i < 20 * n {
-        if i % 2 == 0 {
-            &SNAKE
-        } else {
-            &PLANTGUY
-        }
-    } else if i < 22 * n {
-        if i % 2 == 0 {
-            &SKELETON2
-        } else {
-            &CRAWL
-        }
-    } else if i < 23 * n {
-        &CRAWL
-    } else {
-        &SHADOW
-    };
+    let wave = &waves[(i / 50) % waves.len()];
+    let t = wave[i % wave.len()];
 
     return Enemy {
         x: x,
