@@ -1,6 +1,6 @@
-use std::io::Read;
-
 extern crate libc;
+
+use std::io::Read;
 
 pub struct Input {
     termios: libc::termios,
