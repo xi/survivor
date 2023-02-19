@@ -68,6 +68,42 @@ impl Player {
     }
 }
 
+impl Player {
+    pub fn recover(&mut self, dt: f32) {
+        self.health = (self.health + self.health_recover * dt).min(self.health_max);
+    }
+
+    pub fn levelup(&mut self, rng: &mut random::Rng) {
+        while self.xp >= self.next_level {
+            self.last_level = self.next_level;
+            self.next_level *= 2;
+
+            match rng.gen_range(0, 7) {
+                PERK_POWER => {
+                    self.power *= 1.1;
+                }
+                PERK_HEALTH => {
+                    self.health_max *= 1.1;
+                }
+                PERK_SPEED => {
+                    self.speed *= 1.1;
+                }
+                PERK_RADIUS => {
+                    self.damage_radius *= 1.1;
+                }
+                PERK_HEAL => {
+                    self.health = self.health_max;
+                }
+                PERK_RECOVER => self.health_recover += 0.2,
+                PERK_ATTRACT => {
+                    self.diamond_radius *= 1.1;
+                }
+                _ => unreachable!(),
+            }
+        }
+    }
+}
+
 pub struct Game {
     pub player: Player,
     pub diamonds: Vec<Diamond>,
@@ -94,21 +130,17 @@ impl Game {
         };
     }
 
-    pub fn step(&mut self, dt: f32) {
-        let height = win::iconvert_y(self.win.height);
-        let width = win::iconvert_x(self.win.width);
-        let sprite_height = win::iconvert_y(sprites::HEIGHT);
-        let sprite_width = win::iconvert_x(sprites::WIDTH);
-
-        // move
+    fn move_player(&mut self, dt: f32) {
         match self.player.dir {
             Dir::Up => self.player.y -= self.player.speed * dt,
             Dir::Right => self.player.x += self.player.speed * dt,
             Dir::Down => self.player.y += self.player.speed * dt,
             Dir::Left => self.player.x -= self.player.speed * dt,
             Dir::Stop => {}
-        }
+        };
+    }
 
+    fn move_enemies(&mut self, dt: f32) {
         for i in 0..self.enemies.len() {
             let enemy = &self.enemies[i];
 
@@ -142,18 +174,42 @@ impl Game {
             enemy.x += dx * enemy.t.speed * dt;
             enemy.y += dy * enemy.t.speed * dt;
         }
+    }
 
-        // recover
-        self.player.health =
-            (self.player.health + self.player.health_recover * dt).min(self.player.health_max);
+    fn spawn_enemies(&mut self, dt: f32) {
+        let height = win::iconvert_y(self.win.height);
+        let width = win::iconvert_x(self.win.width);
+        let sprite_height = win::iconvert_y(sprites::HEIGHT);
+        let sprite_width = win::iconvert_x(sprites::WIDTH);
 
-        // despawn
+        if self.enemies.len() < MAX_ENEMIES && self.rng.gen_f32() < dt * 2.0 {
+            let (spawn_x, spawn_y) = match self.rng.gen_range(0, 4) {
+                0 => (self.rng.gen_f32() * width, -sprite_height),
+                1 => (width + sprite_width, self.rng.gen_f32() * height),
+                2 => (self.rng.gen_f32() * width, height + sprite_height),
+                3 => (-sprite_width, self.rng.gen_f32() * height),
+                _ => unreachable!(),
+            };
+
+            self.enemies.push(enemies::get_enemy(
+                spawn_x + self.player.x - width / 2.0,
+                spawn_y + self.player.y - height / 2.0,
+                self.i_enemy,
+            ));
+            self.i_enemy += 1;
+        }
+    }
+
+    fn despawn_enemies(&mut self) {
+        let height = win::iconvert_y(self.win.height);
+        let width = win::iconvert_x(self.win.width);
         self.enemies = std::mem::take(&mut self.enemies)
             .into_iter()
             .filter(|e| (e.y - self.player.y).abs() < height && (e.x - self.player.x).abs() < width)
             .collect();
+    }
 
-        // interact with enemies
+    fn apply_damage(&mut self, dt: f32) {
         for enemy in self.enemies.iter_mut() {
             let dx = self.player.x - enemy.x;
             let dy = self.player.y - enemy.y;
@@ -182,8 +238,9 @@ impl Game {
                 }
             })
             .collect();
+    }
 
-        // interact with diamonds
+    fn pick_diamonds(&mut self) {
         self.diamonds = std::mem::take(&mut self.diamonds)
             .into_iter()
             .filter(|diamond| {
@@ -198,56 +255,22 @@ impl Game {
                 }
             })
             .collect();
-
-        while self.player.xp >= self.player.next_level {
-            self.player.last_level = self.player.next_level;
-            self.player.next_level *= 2;
-
-            match self.rng.gen_range(0, 7) {
-                PERK_POWER => {
-                    self.player.power *= 1.1;
-                }
-                PERK_HEALTH => {
-                    self.player.health_max *= 1.1;
-                }
-                PERK_SPEED => {
-                    self.player.speed *= 1.1;
-                }
-                PERK_RADIUS => {
-                    self.player.damage_radius *= 1.1;
-                }
-                PERK_HEAL => {
-                    self.player.health = self.player.health_max;
-                }
-                PERK_RECOVER => self.player.health_recover += 0.2,
-                PERK_ATTRACT => {
-                    self.player.diamond_radius *= 1.1;
-                }
-                _ => unreachable!(),
-            }
-        }
-
-        // spawn
-        if self.enemies.len() < MAX_ENEMIES && self.rng.gen_f32() < dt * 2.0 {
-            let (spawn_x, spawn_y) = match self.rng.gen_range(0, 4) {
-                0 => (self.rng.gen_f32() * width, -sprite_height),
-                1 => (width + sprite_width, self.rng.gen_f32() * height),
-                2 => (self.rng.gen_f32() * width, height + sprite_height),
-                3 => (-sprite_width, self.rng.gen_f32() * height),
-                _ => unreachable!(),
-            };
-
-            self.enemies.push(enemies::get_enemy(
-                spawn_x + self.player.x - width / 2.0,
-                spawn_y + self.player.y - height / 2.0,
-                self.i_enemy,
-            ));
-            self.i_enemy += 1;
-        }
-        self.enemies.sort_unstable_by_key(|e| e.y as i32);
     }
 
-    pub fn render(&self, screen: &mut term::Screen) {
+    pub fn step(&mut self, dt: f32) {
+        self.spawn_enemies(dt);
+        self.move_player(dt);
+        self.move_enemies(dt);
+        self.despawn_enemies();
+
+        self.apply_damage(dt);
+        self.pick_diamonds();
+
+        self.player.recover(dt);
+        self.player.levelup(&mut self.rng);
+    }
+
+    pub fn render(&mut self, screen: &mut term::Screen) {
         let height = win::iconvert_y(self.win.height);
         let width = win::iconvert_x(self.win.width);
 
@@ -268,6 +291,7 @@ impl Game {
         }
 
         let mut player_rendered = false;
+        self.enemies.sort_unstable_by_key(|e| e.y as i32);
         for enemy in self.enemies.iter() {
             if !player_rendered && enemy.y > self.player.y {
                 self.win.sprite(

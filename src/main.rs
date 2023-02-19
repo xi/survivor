@@ -82,7 +82,6 @@ fn main() {
             break;
         }
 
-        // sleep
         let time2 = time::Instant::now();
         if TICK > time2 - time1 {
             thread::sleep(TICK - (time2 - time1));
