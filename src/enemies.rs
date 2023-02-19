@@ -1,6 +1,6 @@
 // https://vampire-survivors.fandom.com/wiki/Enemies
 
-extern crate sprites;
+use crate::sprites;
 
 pub struct EnemyType {
     pub speed: f32,

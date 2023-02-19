@@ -1,4 +1,4 @@
-survivor: src/main.rs src/input.rs src/random.rs src/term.rs src/enemies.rs liblibc.rlib libsprites.rlib
+survivor: src/main.rs src/input.rs src/random.rs src/term.rs src/enemies.rs src/sprites.rs liblibc.rlib
 	rustc -O --crate-name $@ --extern libc=liblibc.rlib --extern sprites=libsprites.rlib src/main.rs
 	strip $@
 
