@@ -21,7 +21,7 @@ the player receives a random perk:
 ## Installation
 
 The game is written in rust and does not have any dependencies outside the
-standard library and libc. You can run `make` to compile it.
+standard library and libc. You can run `cargo run` to build and execute it.
 
 Note that the code is not very portable yet, so there might be issues on
 non-linux, non-glibc, or non-xterm environments.

@@ -1,0 +1,13 @@
+[package]
+name = "survivor"
+version = "0.1.0"
+edition = "2021"
+repository = "https://github.com/xi/survivor"
+
+[dependencies]
+libc = "0.2"
+ppm = { path = "ppm" }
+
+[profile.dev]
+opt-level = 2
+strip = true
