@@ -97,12 +97,28 @@ const HOOD: EnemyType = EnemyType {
     sprite: &sprites::HOOD,
 };
 
+const HOOD2: EnemyType = EnemyType {
+    speed: 13.0,
+    size: 9.0,
+    health: 40.0,
+    power: 50.0,
+    sprite: &sprites::HOOD2,
+};
+
 const PLANTGUY: EnemyType = EnemyType {
     speed: 10.0,
     size: 9.0,
     health: 50.0,
     power: 30.0,
     sprite: &sprites::PLANTGUY,
+};
+
+const RADDISH: EnemyType = EnemyType {
+    speed: 15.0,
+    size: 9.0,
+    health: 30.0,
+    power: 40.0,
+    sprite: &sprites::RADDISH,
 };
 
 const CRAWL: EnemyType = EnemyType {
@@ -139,10 +155,14 @@ pub fn get_enemy(x: f32, y: f32, i: usize) -> Enemy {
         vec![&MUMMY, &ZOMBIE],
         vec![&MUMMY, &ZOMBIE],
         vec![&HOOD],
-        vec![&HOOD],
-        vec![&HOOD],
+        vec![&HOOD, &EYE],
         vec![&SNAKE, &PLANTGUY],
         vec![&SNAKE, &PLANTGUY],
+        vec![&HOOD2],
+        vec![&HOOD2, &HOOD],
+        vec![&HOOD2],
+        vec![&SNAKE, &RADDISH],
+        vec![&RADDISH, &PLANTGUY],
         vec![&SKELETON2, &CRAWL],
         vec![&SKELETON2, &CRAWL],
         vec![&CRAWL],
