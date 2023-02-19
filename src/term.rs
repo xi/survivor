@@ -93,6 +93,7 @@ pub struct Screen {
 impl Drop for Screen {
     fn drop(&mut self) {
         ti::cnorm();
+        ti::sgr0();
     }
 }
 
@@ -101,6 +102,7 @@ impl Screen {
         let (w, h) = get_terminal_size();
         let width = w * 2;
         let height = (h - 1) * 3;
+        ti::civis();
         return Screen {
             width: width,
             height: height,
@@ -117,7 +119,6 @@ impl Screen {
         let mut prev_fg = [0xff, 0xff, 0xff];
 
         ti::cup(0, 0);
-        ti::civis();
         for y in 0..(self.height / 3) {
             for x in 0..(self.width / 2) {
                 let (block, bg, fg) = get_block([
