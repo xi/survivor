@@ -1,6 +1,24 @@
 use crate::sprites;
 use crate::term::Screen;
 
+const Y_FACTOR: f32 = 1.4;
+
+pub fn convert_x(x: f32) -> i64 {
+    return x as i64;
+}
+
+pub fn convert_y(y: f32) -> i64 {
+    return (y / Y_FACTOR) as i64;
+}
+
+pub fn iconvert_x(x: usize) -> f32 {
+    return x as f32;
+}
+
+pub fn iconvert_y(y: usize) -> f32 {
+    return y as f32 * Y_FACTOR;
+}
+
 pub struct Window {
     pub height: usize,
     pub width: usize,
@@ -29,8 +47,8 @@ impl Window {
         sprite: &sprites::Sprite,
         invert: bool,
     ) {
-        let x0 = screen.convert_x(cx) - sprites::WIDTH as i64 / 2;
-        let y0 = screen.convert_y(cy) + sprites::WIDTH as i64 / 2 - sprites::HEIGHT as i64;
+        let x0 = convert_x(cx) - sprites::WIDTH as i64 / 2;
+        let y0 = convert_y(cy) + sprites::WIDTH as i64 / 2 - sprites::HEIGHT as i64;
 
         for dy in 0..sprites::HEIGHT {
             let y = y0 + dy as i64;
@@ -60,17 +78,17 @@ impl Window {
     pub fn circle(&self, screen: &mut Screen, cx: f32, cy: f32, r: f32, color: [u8; 3]) {
         let r2 = r * r;
 
-        let y0 = screen.convert_y(cy - r).max(0).min(self.height as i64 - 1) as usize;
-        let x0 = screen.convert_x(cx - r).max(0).min(self.width as i64 - 1) as usize;
+        let y0 = convert_y(cy - r).max(0).min(self.height as i64 - 1) as usize;
+        let x0 = convert_x(cx - r).max(0).min(self.width as i64 - 1) as usize;
 
-        let y1 = screen.convert_y(cy + r).max(0).min(self.height as i64 - 1) as usize;
-        let x1 = screen.convert_x(cx + r).max(0).min(self.width as i64) as usize;
+        let y1 = convert_y(cy + r).max(0).min(self.height as i64 - 1) as usize;
+        let x1 = convert_x(cx + r).max(0).min(self.width as i64) as usize;
 
         for y in y0..=y1 {
-            let dy = screen.iconvert_y(y) - cy;
+            let dy = iconvert_y(y) - cy;
             let y2 = dy * dy;
             for x in x0..=x1 {
-                let dx = screen.iconvert_x(x) - cx;
+                let dx = iconvert_x(x) - cx;
                 if dx * dx + y2 <= r2 {
                     self.set(screen, x, y, color);
                 }

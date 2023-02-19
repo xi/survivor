@@ -1,7 +1,5 @@
 extern crate libc;
 
-const Y_FACTOR: f32 = 1.4;
-
 fn get_terminal_size() -> (usize, usize) {
     let w = [0u16; 4];
     unsafe {
@@ -145,21 +143,5 @@ impl Screen {
         }
 
         ti::sgr0();
-    }
-
-    pub fn convert_x(&self, x: f32) -> i64 {
-        return x as i64;
-    }
-
-    pub fn convert_y(&self, y: f32) -> i64 {
-        return (y / Y_FACTOR) as i64;
-    }
-
-    pub fn iconvert_x(&self, x: usize) -> f32 {
-        return x as f32;
-    }
-
-    pub fn iconvert_y(&self, y: usize) -> f32 {
-        return y as f32 * Y_FACTOR;
     }
 }

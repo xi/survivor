@@ -1,6 +1,7 @@
 extern crate libc;
 
 mod enemies;
+mod game;
 mod input;
 mod random;
 mod sprites;
@@ -11,94 +12,21 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::{thread, time};
 
 const TICK: time::Duration = time::Duration::from_millis(33);
-const MAX_ENEMIES: usize = 100;
-
-const PERK_POWER: usize = 0;
-const PERK_HEALTH: usize = 1;
-const PERK_SPEED: usize = 2;
-const PERK_RADIUS: usize = 3;
-const PERK_HEAL: usize = 4;
-const PERK_RECOVER: usize = 5;
-const PERK_ATTRACT: usize = 6;
 
 const BLACK: [u8; 3] = [0x00, 0x00, 0x00];
 const RED: [u8; 3] = [0xff, 0x00, 0x00];
-const GREEN: [u8; 3] = [0x00, 0xff, 0x00];
 const BLUE: [u8; 3] = [0x00, 0x00, 0xff];
 
 static RUNNING: AtomicBool = AtomicBool::new(true);
-
-#[derive(PartialEq)]
-enum Dir {
-    Up,
-    Right,
-    Down,
-    Left,
-    Stop,
-}
 
 fn quit(_sig: i32) {
     RUNNING.fetch_and(false, Ordering::Relaxed);
 }
 
-struct Diamond {
-    pub x: f32,
-    pub y: f32,
-}
-
-struct Player {
-    pub x: f32,
-    pub y: f32,
-    pub dir: Dir,
-    pub face: Dir,
-    pub speed: f32,
-    pub size: f32,
-    pub health: f32,
-    pub health_max: f32,
-    pub health_recover: f32,
-    pub power: f32,
-    pub damage_radius: f32,
-    pub diamond_radius: f32,
-    pub xp: usize,
-    pub last_level: usize,
-    pub next_level: usize,
-}
-
 fn main() {
     let input = input::Input::new();
     let mut screen = term::Screen::new();
-    let win = win::Window {
-        width: screen.width,
-        height: screen.height - 6,
-        dx: 0,
-        dy: 3,
-    };
-    let mut rng = random::Rng::new();
-    let width = screen.iconvert_x(win.width);
-    let height = screen.iconvert_y(win.height);
-    let sprite_width = screen.iconvert_x(sprites::WIDTH);
-    let sprite_height = screen.iconvert_y(sprites::HEIGHT);
-    let mut enemies: Vec<enemies::Enemy> = vec![];
-    let mut diamonds: Vec<Diamond> = vec![];
-    let mut i_enemy = 0;
-
-    let mut player = Player {
-        x: 0.0,
-        y: 0.0,
-        dir: Dir::Stop,
-        face: Dir::Right,
-        speed: 30.0,
-        size: 9.0,
-        health: 50.0,
-        health_max: 50.0,
-        health_recover: 0.0,
-        power: 10.0,
-        damage_radius: 30.0,
-        diamond_radius: 15.0,
-        xp: 0,
-        last_level: 0,
-        next_level: 10,
-    };
+    let mut game = game::Game::new(&screen);
 
     unsafe {
         libc::signal(libc::SIGINT, quit as usize);
@@ -108,219 +36,29 @@ fn main() {
 
     while RUNNING.load(Ordering::Relaxed) {
         let time1 = time::Instant::now();
-        let dt = (time1 - time0).as_secs_f32();
 
         match input.getch() {
-            Some(b'w' | b'A') => player.dir = Dir::Up,
+            Some(b'w' | b'A') => game.player.dir = game::Dir::Up,
             Some(b'a' | b'D') => {
-                player.dir = Dir::Left;
-                player.face = Dir::Left
+                game.player.dir = game::Dir::Left;
+                game.player.face = game::Dir::Left
             }
-            Some(b's' | b'B') => player.dir = Dir::Down,
+            Some(b's' | b'B') => game.player.dir = game::Dir::Down,
             Some(b'd' | b'C') => {
-                player.dir = Dir::Right;
-                player.face = Dir::Right
+                game.player.dir = game::Dir::Right;
+                game.player.face = game::Dir::Right
             }
-            Some(b' ') => player.dir = Dir::Stop,
+            Some(b' ') => game.player.dir = game::Dir::Stop,
             Some(b'q') => quit(0),
             _ => {}
         }
 
-        // move
-        match player.dir {
-            Dir::Up => player.y -= player.speed * dt,
-            Dir::Right => player.x += player.speed * dt,
-            Dir::Down => player.y += player.speed * dt,
-            Dir::Left => player.x -= player.speed * dt,
-            Dir::Stop => {}
-        }
+        game.step((time1 - time0).as_secs_f32());
+        game.render(&mut screen);
 
-        for i in 0..enemies.len() {
-            let enemy = &enemies[i];
-
-            let dxp = player.x - enemy.x;
-            let dyp = player.y - enemy.y;
-            let dp = (dxp * dxp + dyp * dyp).sqrt();
-
-            let mut dx = dxp / dp;
-            let mut dy = dyp / dp;
-
-            for j in 0..enemies.len() {
-                if i != j {
-                    let other = &enemies[j];
-
-                    let dxm = other.x - enemy.x;
-                    let dym = other.y - enemy.y;
-                    let dm = (dxm * dxm + dym * dym).sqrt();
-
-                    if dm < enemy.t.size + other.t.size {
-                        dx -= dxm / dm;
-                        dy -= dym / dm;
-                    }
-                }
-            }
-
-            let d = (dx * dx + dy * dy).sqrt();
-            dx /= d;
-            dy /= d;
-
-            let mut enemy = &mut enemies[i];
-            enemy.x += dx * enemy.t.speed * dt;
-            enemy.y += dy * enemy.t.speed * dt;
-        }
-
-        // recover
-        player.health = (player.health + player.health_recover * dt).min(player.health_max);
-
-        // despawn
-        enemies = enemies
-            .into_iter()
-            .filter(|e| (e.y - player.y).abs() < height && (e.x - player.x).abs() < width)
-            .collect();
-
-        // interact with enemies
-        for enemy in enemies.iter_mut() {
-            let dx = player.x - enemy.x;
-            let dy = player.y - enemy.y;
-
-            let size = enemy.t.size + player.size;
-            if dx * dx + dy * 2.0 * dy * 2.0 < size * size {
-                player.health -= enemy.t.power * dt;
-            }
-
-            if dx * dx + dy * dy < player.damage_radius * player.damage_radius {
-                enemy.health -= player.power * dt;
-            }
-        }
-
-        enemies = enemies
-            .into_iter()
-            .filter(|enemy| {
-                if enemy.health <= 0.0 {
-                    diamonds.push(Diamond {
-                        x: enemy.x,
-                        y: enemy.y,
-                    });
-                    return false;
-                } else {
-                    return true;
-                }
-            })
-            .collect();
-
-        if player.health < 0.0 {
-            println!("\nyou died (score: {})", player.xp);
-            break;
-        }
-
-        // interact with diamonds
-        diamonds = diamonds
-            .into_iter()
-            .filter(|diamond| {
-                let dx = player.x - diamond.x;
-                let dy = player.y - diamond.y;
-                let d = dx * dx + dy * dy;
-                if d < player.diamond_radius * player.diamond_radius {
-                    player.xp += 1;
-                    return false;
-                } else {
-                    return true;
-                }
-            })
-            .collect();
-
-        while player.xp >= player.next_level {
-            player.last_level = player.next_level;
-            player.next_level *= 2;
-
-            match rng.gen_range(0, 7) {
-                PERK_POWER => {
-                    player.power *= 1.1;
-                }
-                PERK_HEALTH => {
-                    player.health_max *= 1.1;
-                }
-                PERK_SPEED => {
-                    player.speed *= 1.1;
-                }
-                PERK_RADIUS => {
-                    player.damage_radius *= 1.1;
-                }
-                PERK_HEAL => {
-                    player.health = player.health_max;
-                }
-                PERK_RECOVER => player.health_recover += 0.2,
-                PERK_ATTRACT => {
-                    player.diamond_radius *= 1.1;
-                }
-                _ => unreachable!(),
-            }
-        }
-
-        // spawn
-        if enemies.len() < MAX_ENEMIES && rng.gen_f32() < dt * 2.0 {
-            let (spawn_x, spawn_y) = match rng.gen_range(0, 4) {
-                0 => (rng.gen_f32() * width, -sprite_height),
-                1 => (width + sprite_width, rng.gen_f32() * height),
-                2 => (rng.gen_f32() * width, height + sprite_height),
-                3 => (-sprite_width, rng.gen_f32() * height),
-                _ => unreachable!(),
-            };
-
-            enemies.push(enemies::get_enemy(
-                spawn_x + player.x - width / 2.0,
-                spawn_y + player.y - height / 2.0,
-                i_enemy,
-            ));
-            i_enemy += 1;
-        }
-
-        // render
-        win.fill(&mut screen, [0x33, 0x88, 0x22]);
-        win.circle(
-            &mut screen,
-            width / 2.0,
-            height / 2.0,
-            player.damage_radius,
-            GREEN,
-        );
-
-        for diamond in diamonds.iter() {
-            let sx = diamond.x - player.x + width / 2.0;
-            let sy = diamond.y - player.y + height / 2.0;
-            win.sprite(&mut screen, sx, sy, &sprites::DIAMOND, false);
-        }
-
-        enemies.sort_unstable_by_key(|e| e.y as i32);
-        let mut player_rendered = false;
-        for enemy in enemies.iter() {
-            if !player_rendered && enemy.y > player.y {
-                win.sprite(
-                    &mut screen,
-                    width / 2.0,
-                    height / 2.0,
-                    &sprites::PLAYER,
-                    player.face == Dir::Left,
-                );
-                player_rendered = true;
-            }
-
-            let sx = enemy.x - player.x + width / 2.0;
-            let sy = enemy.y - player.y + height / 2.0;
-            win.sprite(&mut screen, sx, sy, enemy.t.sprite, enemy.x > player.x);
-        }
-        if !player_rendered {
-            win.sprite(
-                &mut screen,
-                width / 2.0,
-                height / 2.0,
-                &sprites::PLAYER,
-                player.face == Dir::Left,
-            );
-        }
-
-        let xp_bar = (screen.width as f32 * (player.xp - player.last_level) as f32
-            / (player.next_level - player.last_level) as f32) as usize;
+        let xp_bar = (screen.width as f32 * (game.player.xp - game.player.last_level) as f32
+            / (game.player.next_level - game.player.last_level) as f32)
+            as usize;
         for x in 0..screen.width {
             let c = if x <= xp_bar { BLUE } else { BLACK };
             for y in 0..3 {
@@ -328,7 +66,8 @@ fn main() {
             }
         }
 
-        let health_bar = (screen.width as f32 * player.health / player.health_max) as usize;
+        let health_bar =
+            (screen.width as f32 * game.player.health / game.player.health_max) as usize;
         for x in 0..screen.width {
             let c = if x <= health_bar { RED } else { BLACK };
             for y in (screen.height - 3)..screen.height {
@@ -337,6 +76,11 @@ fn main() {
         }
 
         screen.render();
+
+        if game.player.health < 0.0 {
+            println!("\nyou died (score: {})", game.player.xp);
+            break;
+        }
 
         // sleep
         let time2 = time::Instant::now();
