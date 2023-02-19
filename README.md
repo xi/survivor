@@ -23,9 +23,6 @@ the player receives a random perk:
 The game is written in rust and does not have any dependencies outside the
 standard library and libc. You can run `cargo run` to build and execute it.
 
-Note that the code is not very portable yet, so there might be issues on
-non-linux, non-glibc, or non-xterm environments.
-
 ## Controls
 
 -	Up/w: move up
@@ -75,7 +72,6 @@ there is a good chance that it will improve if you reduce the window size.
 
 -	Add more weapons
 -	Let the player pick a perk on level up
--	Make the code more portable
 -	Improve balancing
 -	Add tarain
 -	More enemy waves
