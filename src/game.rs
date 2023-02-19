@@ -261,6 +261,8 @@ impl Game {
     pub fn render(&mut self, win: &mut win::Window) {
         let height = win::iconvert_y(win.height);
         let width = win::iconvert_x(win.width);
+        let dx = width / 2.0 - self.player.x;
+        let dy = height / 2.0 - self.player.y;
 
         win.fill([0x33, 0x88, 0x22]);
         win.circle(
@@ -271,9 +273,7 @@ impl Game {
         );
 
         for diamond in self.diamonds.iter() {
-            let sx = diamond.x - self.player.x + width / 2.0;
-            let sy = diamond.y - self.player.y + height / 2.0;
-            win.sprite(sx, sy, &sprites::DIAMOND, false);
+            win.sprite(diamond.x + dx, diamond.y + dy, &sprites::DIAMOND, false);
         }
 
         let mut player_rendered = false;
@@ -289,9 +289,12 @@ impl Game {
                 player_rendered = true;
             }
 
-            let sx = enemy.x - self.player.x + width / 2.0;
-            let sy = enemy.y - self.player.y + height / 2.0;
-            win.sprite(sx, sy, enemy.t.sprite, enemy.x > self.player.x);
+            win.sprite(
+                enemy.x + dx,
+                enemy.y + dy,
+                enemy.t.sprite,
+                enemy.x > self.player.x,
+            );
         }
         if !player_rendered {
             win.sprite(
