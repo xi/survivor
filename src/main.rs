@@ -37,20 +37,22 @@ fn main() {
     while RUNNING.load(Ordering::Relaxed) {
         let time1 = time::Instant::now();
 
-        match input.getch() {
-            Some(b'w' | b'A') => game.player.dir = game::Dir::Up,
-            Some(b'a' | b'D') => {
-                game.player.dir = game::Dir::Left;
-                game.player.face = game::Dir::Left
+        while let Some(c) = input.getch() {
+            match c {
+                b'w' | b'A' => game.player.dir = game::Dir::Up,
+                b'a' | b'D' => {
+                    game.player.dir = game::Dir::Left;
+                    game.player.face = game::Dir::Left
+                }
+                b's' | b'B' => game.player.dir = game::Dir::Down,
+                b'd' | b'C' => {
+                    game.player.dir = game::Dir::Right;
+                    game.player.face = game::Dir::Right
+                }
+                b' ' => game.player.dir = game::Dir::Stop,
+                b'q' => quit(0),
+                _ => {}
             }
-            Some(b's' | b'B') => game.player.dir = game::Dir::Down,
-            Some(b'd' | b'C') => {
-                game.player.dir = game::Dir::Right;
-                game.player.face = game::Dir::Right
-            }
-            Some(b' ') => game.player.dir = game::Dir::Stop,
-            Some(b'q') => quit(0),
-            _ => {}
         }
 
         game.step((time1 - time0).as_secs_f32());
