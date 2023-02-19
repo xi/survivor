@@ -20,6 +20,11 @@ const PERK_HEAL: usize = 4;
 const PERK_RECOVER: usize = 5;
 const PERK_ATTRACT: usize = 6;
 
+const BLACK: [u8; 3] = [0x00, 0x00, 0x00];
+const RED: [u8; 3] = [0xff, 0x00, 0x00];
+const GREEN: [u8; 3] = [0x00, 0xff, 0x00];
+const BLUE: [u8; 3] = [0x00, 0x00, 0xff];
+
 static RUNNING: AtomicBool = AtomicBool::new(true);
 
 #[derive(PartialEq)]
@@ -99,18 +104,6 @@ fn circle(screen: &mut term::Screen, cx: f32, cy: f32, r: f32, color: [u8; 3]) {
             if dx * dx + y2 <= r2 {
                 screen.set(x, y, color);
             }
-        }
-    }
-}
-
-fn bar(screen: &mut term::Screen, y: usize, value: f32, color: [u8; 3]) {
-    let black = [0x00, 0x00, 0x00];
-
-    for x in 0..screen.width {
-        let fx = x as f32 / screen.width as f32;
-        let c = if fx <= value { color } else { black };
-        for dy in 0..3 {
-            screen.set(x, y + dy, c);
         }
     }
 }
@@ -350,7 +343,7 @@ fn main() {
             width / 2.0,
             height / 2.0,
             player.damage_radius,
-            [0x00, 0xff, 0x00],
+            GREEN,
         );
 
         for diamond in diamonds.iter() {
@@ -387,19 +380,22 @@ fn main() {
             );
         }
 
-        bar(
-            &mut screen,
-            0,
-            (player.xp - player.last_level) as f32 / (player.next_level - player.last_level) as f32,
-            [0x00, 0x00, 0xff],
-        );
-        let h = screen.height;
-        bar(
-            &mut screen,
-            h - 3,
-            player.health / player.health_max,
-            [0xff, 0x00, 0x00],
-        );
+        let xp_bar = (screen.width as f32 * (player.xp - player.last_level) as f32
+            / (player.next_level - player.last_level) as f32) as usize;
+        for x in 0..screen.width {
+            let c = if x <= xp_bar { BLUE } else { BLACK };
+            for y in 0..3 {
+                screen.set(x, y, c);
+            }
+        }
+
+        let health_bar = (screen.width as f32 * player.health / player.health_max) as usize;
+        for x in 0..screen.width {
+            let c = if x <= health_bar { RED } else { BLACK };
+            for y in (screen.height - 3)..screen.height {
+                screen.set(x, y, c);
+            }
+        }
 
         screen.render();
 
