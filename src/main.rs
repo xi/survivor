@@ -47,7 +47,7 @@ fn render_health_bar(player: &game::Player, screen: &mut term::Screen) {
 fn main() {
     let input = input::Input::new();
     let mut screen = term::Screen::new();
-    let mut game = game::Game::new(&screen);
+    let mut game = game::Game::new();
 
     unsafe {
         libc::signal(libc::SIGINT, quit as usize);
@@ -77,8 +77,17 @@ fn main() {
             }
         }
 
-        game.step(dt);
-        game.render(&mut screen);
+        let mut win = win::Window {
+            width: screen.width,
+            height: screen.height - 6,
+            dx: 0,
+            dy: 3,
+            screen: &mut screen,
+        };
+        let width = win::iconvert_x(win.width);
+        let height = win::iconvert_y(win.height);
+        game.step(dt, width, height);
+        game.render(&mut win);
 
         render_xp_bar(&game.player, &mut screen);
         render_health_bar(&game.player, &mut screen);

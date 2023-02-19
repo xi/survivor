@@ -19,34 +19,28 @@ pub fn iconvert_y(y: usize) -> f32 {
     return y as f32 * Y_FACTOR;
 }
 
-pub struct Window {
+pub struct Window<'a> {
     pub height: usize,
     pub width: usize,
     pub dx: usize,
     pub dy: usize,
+    pub screen: &'a mut Screen,
 }
 
-impl Window {
-    pub fn set(&self, screen: &mut Screen, x: usize, y: usize, color: [u8; 3]) {
-        screen.set(x + self.dx, y + self.dy, color);
+impl Window<'_> {
+    pub fn set(&mut self, x: usize, y: usize, color: [u8; 3]) {
+        self.screen.set(x + self.dx, y + self.dy, color);
     }
 
-    pub fn fill(&self, screen: &mut Screen, color: [u8; 3]) {
+    pub fn fill(&mut self, color: [u8; 3]) {
         for y in 0..self.height {
             for x in 0..self.width {
-                self.set(screen, x, y, color);
+                self.set(x, y, color);
             }
         }
     }
 
-    pub fn sprite(
-        &self,
-        screen: &mut Screen,
-        cx: f32,
-        cy: f32,
-        sprite: &sprites::Sprite,
-        invert: bool,
-    ) {
+    pub fn sprite(&mut self, cx: f32, cy: f32, sprite: &sprites::Sprite, invert: bool) {
         let x0 = convert_x(cx) - sprites::WIDTH as i64 / 2;
         let y0 = convert_y(cy) + sprites::WIDTH as i64 / 2 - sprites::HEIGHT as i64;
 
@@ -69,13 +63,13 @@ impl Window {
                 let cx = if invert { sprites::WIDTH - dx - 1 } else { dx };
                 let c = sprite[dy][cx];
                 if c != sprite[0][0] {
-                    self.set(screen, x as usize, y as usize, c);
+                    self.set(x as usize, y as usize, c);
                 }
             }
         }
     }
 
-    pub fn circle(&self, screen: &mut Screen, cx: f32, cy: f32, r: f32, color: [u8; 3]) {
+    pub fn circle(&mut self, cx: f32, cy: f32, r: f32, color: [u8; 3]) {
         let r2 = r * r;
 
         let y0 = convert_y(cy - r).max(0).min(self.height as i64 - 1) as usize;
@@ -90,7 +84,7 @@ impl Window {
             for x in x0..=x1 {
                 let dx = iconvert_x(x) - cx;
                 if dx * dx + y2 <= r2 {
-                    self.set(screen, x, y, color);
+                    self.set(x, y, color);
                 }
             }
         }

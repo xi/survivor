@@ -1,7 +1,6 @@
 use crate::enemies;
 use crate::random;
 use crate::sprites;
-use crate::term;
 use crate::win;
 
 const MAX_ENEMIES: usize = 100;
@@ -109,23 +108,16 @@ pub struct Game {
     pub diamonds: Vec<Diamond>,
     pub enemies: Vec<enemies::Enemy>,
     pub i_enemy: usize,
-    pub win: win::Window,
     rng: random::Rng,
 }
 
 impl Game {
-    pub fn new(screen: &term::Screen) -> Self {
+    pub fn new() -> Self {
         return Self {
             enemies: vec![],
             diamonds: vec![],
             i_enemy: 0,
             player: Player::new(),
-            win: win::Window {
-                width: screen.width,
-                height: screen.height - 6,
-                dx: 0,
-                dy: 3,
-            },
             rng: random::Rng::new(),
         };
     }
@@ -176,9 +168,7 @@ impl Game {
         }
     }
 
-    fn spawn_enemies(&mut self, dt: f32) {
-        let height = win::iconvert_y(self.win.height);
-        let width = win::iconvert_x(self.win.width);
+    fn spawn_enemies(&mut self, dt: f32, width: f32, height: f32) {
         let sprite_height = win::iconvert_y(sprites::HEIGHT);
         let sprite_width = win::iconvert_x(sprites::WIDTH);
 
@@ -200,9 +190,7 @@ impl Game {
         }
     }
 
-    fn despawn_enemies(&mut self) {
-        let height = win::iconvert_y(self.win.height);
-        let width = win::iconvert_x(self.win.width);
+    fn despawn_enemies(&mut self, width: f32, height: f32) {
         self.enemies = std::mem::take(&mut self.enemies)
             .into_iter()
             .filter(|e| (e.y - self.player.y).abs() < height && (e.x - self.player.x).abs() < width)
@@ -257,11 +245,11 @@ impl Game {
             .collect();
     }
 
-    pub fn step(&mut self, dt: f32) {
-        self.spawn_enemies(dt);
+    pub fn step(&mut self, dt: f32, width: f32, height: f32) {
+        self.spawn_enemies(dt, width, height);
         self.move_player(dt);
         self.move_enemies(dt);
-        self.despawn_enemies();
+        self.despawn_enemies(width, height);
 
         self.apply_damage(dt);
         self.pick_diamonds();
@@ -270,13 +258,12 @@ impl Game {
         self.player.levelup(&mut self.rng);
     }
 
-    pub fn render(&mut self, screen: &mut term::Screen) {
-        let height = win::iconvert_y(self.win.height);
-        let width = win::iconvert_x(self.win.width);
+    pub fn render(&mut self, win: &mut win::Window) {
+        let height = win::iconvert_y(win.height);
+        let width = win::iconvert_x(win.width);
 
-        self.win.fill(screen, [0x33, 0x88, 0x22]);
-        self.win.circle(
-            screen,
+        win.fill([0x33, 0x88, 0x22]);
+        win.circle(
             width / 2.0,
             height / 2.0,
             self.player.damage_radius,
@@ -286,15 +273,14 @@ impl Game {
         for diamond in self.diamonds.iter() {
             let sx = diamond.x - self.player.x + width / 2.0;
             let sy = diamond.y - self.player.y + height / 2.0;
-            self.win.sprite(screen, sx, sy, &sprites::DIAMOND, false);
+            win.sprite(sx, sy, &sprites::DIAMOND, false);
         }
 
         let mut player_rendered = false;
         self.enemies.sort_unstable_by_key(|e| e.y as i32);
         for enemy in self.enemies.iter() {
             if !player_rendered && enemy.y > self.player.y {
-                self.win.sprite(
-                    screen,
+                win.sprite(
                     width / 2.0,
                     height / 2.0,
                     &sprites::PLAYER,
@@ -305,12 +291,10 @@ impl Game {
 
             let sx = enemy.x - self.player.x + width / 2.0;
             let sy = enemy.y - self.player.y + height / 2.0;
-            self.win
-                .sprite(screen, sx, sy, enemy.t.sprite, enemy.x > self.player.x);
+            win.sprite(sx, sy, enemy.t.sprite, enemy.x > self.player.x);
         }
         if !player_rendered {
-            self.win.sprite(
-                screen,
+            win.sprite(
                 width / 2.0,
                 height / 2.0,
                 &sprites::PLAYER,
