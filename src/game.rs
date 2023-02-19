@@ -12,6 +12,7 @@ const PERK_RADIUS: usize = 3;
 const PERK_HEAL: usize = 4;
 const PERK_RECOVER: usize = 5;
 const PERK_ATTRACT: usize = 6;
+const PERK_XP: usize = 7;
 
 #[derive(PartialEq)]
 pub enum Dir {
@@ -39,9 +40,10 @@ pub struct Player {
     pub power: f32,
     pub damage_radius: f32,
     pub diamond_radius: f32,
-    pub xp: usize,
-    pub last_level: usize,
-    pub next_level: usize,
+    pub xp: f32,
+    pub xp_factor: f32,
+    pub last_level: f32,
+    pub next_level: f32,
 }
 
 impl Player {
@@ -58,9 +60,10 @@ impl Player {
             power: 10.0,
             damage_radius: 30.0,
             diamond_radius: 15.0,
-            xp: 0,
-            last_level: 0,
-            next_level: 10,
+            xp: 0.0,
+            xp_factor: 1.0,
+            last_level: 0.0,
+            next_level: 10.0,
         };
     }
 }
@@ -73,28 +76,17 @@ impl Player {
     pub fn levelup(&mut self, rng: &mut random::Rng) {
         while self.xp >= self.next_level {
             self.last_level = self.next_level;
-            self.next_level *= 2;
+            self.next_level *= 2.0;
 
-            match rng.gen_range(0, 7) {
-                PERK_POWER => {
-                    self.power *= 1.1;
-                }
-                PERK_HEALTH => {
-                    self.health_max *= 1.1;
-                }
-                PERK_SPEED => {
-                    self.speed *= 1.1;
-                }
-                PERK_RADIUS => {
-                    self.damage_radius *= 1.1;
-                }
-                PERK_HEAL => {
-                    self.health = self.health_max;
-                }
+            match rng.gen_range(0, 8) {
+                PERK_POWER => self.power *= 1.1,
+                PERK_HEALTH => self.health_max *= 1.1,
+                PERK_SPEED => self.speed *= 1.1,
+                PERK_RADIUS => self.damage_radius *= 1.1,
+                PERK_HEAL => self.health = self.health_max,
                 PERK_RECOVER => self.health_recover += 0.2,
-                PERK_ATTRACT => {
-                    self.diamond_radius *= 1.1;
-                }
+                PERK_ATTRACT => self.diamond_radius *= 1.1,
+                PERK_XP => self.xp_factor *= 1.1,
                 _ => unreachable!(),
             }
         }
@@ -238,7 +230,7 @@ impl Game {
                 let dy = self.player.p.y - diamond.y;
                 let d = dx * dx + dy * dy;
                 if d < self.player.diamond_radius * self.player.diamond_radius {
-                    self.player.xp += 1;
+                    self.player.xp += self.player.xp_factor;
                     return false;
                 } else {
                     return true;

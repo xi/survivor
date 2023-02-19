@@ -15,6 +15,7 @@ the player receives a random perk:
 -	Movement speed is increased by 10%
 -	Damage radius is increased by 10%
 -	Pickup radius is increased by 10%
+-	Experience from diamonds is increased by 10%
 -	Full health is restored
 -	The player recovers +0.2HP per second
 

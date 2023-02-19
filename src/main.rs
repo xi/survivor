@@ -34,8 +34,7 @@ fn render_bar(screen: &mut term::Screen, value: f32, y0: usize, color: [u8; 3]) 
 }
 
 fn render_xp_bar(player: &game::Player, screen: &mut term::Screen) {
-    let value =
-        (player.xp - player.last_level) as f32 / (player.next_level - player.last_level) as f32;
+    let value = (player.xp - player.last_level) / (player.next_level - player.last_level);
     render_bar(screen, value, 0, BLUE);
 }
 
@@ -96,7 +95,7 @@ fn main() {
         print!("{:?}", 1.0 / dt);
 
         if game.player.health < 0.0 {
-            println!("\nyou died (score: {})", game.player.xp);
+            println!("\nyou died (score: {})", game.player.xp as usize);
             break;
         }
 
