@@ -36,6 +36,7 @@ fn main() {
 
     while RUNNING.load(Ordering::Relaxed) {
         let time1 = time::Instant::now();
+        let dt = (time1 - time0).as_secs_f32();
 
         while let Some(c) = input.getch() {
             match c {
@@ -55,7 +56,7 @@ fn main() {
             }
         }
 
-        game.step((time1 - time0).as_secs_f32());
+        game.step(dt);
         game.render(&mut screen);
 
         let xp_bar = (screen.width as f32 * (game.player.xp - game.player.last_level) as f32
@@ -78,6 +79,7 @@ fn main() {
         }
 
         screen.render();
+        print!("{:?}", 1.0 / dt);
 
         if game.player.health < 0.0 {
             println!("\nyou died (score: {})", game.player.xp);
@@ -88,8 +90,6 @@ fn main() {
         if TICK > time2 - time1 {
             thread::sleep(TICK - (time2 - time1));
         }
-        let time3 = time::Instant::now();
-        print!("{:?}", 1.0 / (time3 - time1).as_secs_f64());
         time0 = time1;
     }
 }
