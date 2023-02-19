@@ -3,7 +3,7 @@ use crate::random;
 use crate::sprites;
 use crate::win;
 
-const MAX_ENEMIES: usize = 100;
+const MAX_ENEMIES: usize = 200;
 
 const PERK_POWER: usize = 0;
 const PERK_HEALTH: usize = 1;
@@ -76,7 +76,7 @@ impl Player {
     pub fn levelup(&mut self, rng: &mut random::Rng) {
         while self.xp >= self.next_level {
             self.last_level = self.next_level;
-            self.next_level *= 2.0;
+            self.next_level *= 1.3;
 
             match rng.gen_range(0, 8) {
                 PERK_POWER => self.power *= 1.1,

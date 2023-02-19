@@ -168,6 +168,7 @@ pub fn get_enemy(x: f32, y: f32, i: usize) -> Enemy {
         vec![&CRAWL],
         vec![&SHADOW],
         vec![&SHADOW],
+        vec![&SHADOW],
     ];
 
     let wave = &waves[(i / 50) % waves.len()];
