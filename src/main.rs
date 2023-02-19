@@ -23,6 +23,27 @@ fn quit(_sig: i32) {
     RUNNING.fetch_and(false, Ordering::Relaxed);
 }
 
+fn render_bar(screen: &mut term::Screen, value: f32, y0: usize, color: [u8; 3]) {
+    let x0 = (screen.width as f32 * value) as usize;
+    for x in 0..screen.width {
+        let c = if x <= x0 { color } else { BLACK };
+        for dy in 0..3 {
+            screen.set(x, y0 + dy, c);
+        }
+    }
+}
+
+fn render_xp_bar(player: &game::Player, screen: &mut term::Screen) {
+    let value = (player.xp - player.last_level) as f32
+        / (player.next_level - player.last_level) as f32;
+    render_bar(screen, value, 0, BLUE);
+}
+
+fn render_health_bar(player: &game::Player, screen: &mut term::Screen) {
+    let value = player.health / player.health_max;
+    render_bar(screen, value, screen.height - 3, RED);
+}
+
 fn main() {
     let input = input::Input::new();
     let mut screen = term::Screen::new();
@@ -59,24 +80,8 @@ fn main() {
         game.step(dt);
         game.render(&mut screen);
 
-        let xp_bar = (screen.width as f32 * (game.player.xp - game.player.last_level) as f32
-            / (game.player.next_level - game.player.last_level) as f32)
-            as usize;
-        for x in 0..screen.width {
-            let c = if x <= xp_bar { BLUE } else { BLACK };
-            for y in 0..3 {
-                screen.set(x, y, c);
-            }
-        }
-
-        let health_bar =
-            (screen.width as f32 * game.player.health / game.player.health_max) as usize;
-        for x in 0..screen.width {
-            let c = if x <= health_bar { RED } else { BLACK };
-            for y in (screen.height - 3)..screen.height {
-                screen.set(x, y, c);
-            }
-        }
+        render_xp_bar(&game.player, &mut screen);
+        render_health_bar(&game.player, &mut screen);
 
         screen.render();
         print!("{:?}", 1.0 / dt);
