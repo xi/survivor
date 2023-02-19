@@ -1,4 +1,4 @@
 /target
 survivor
 *.rlib
-sprites.rs
+*.so
