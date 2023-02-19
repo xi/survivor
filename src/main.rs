@@ -34,8 +34,8 @@ fn render_bar(screen: &mut term::Screen, value: f32, y0: usize, color: [u8; 3]) 
 }
 
 fn render_xp_bar(player: &game::Player, screen: &mut term::Screen) {
-    let value = (player.xp - player.last_level) as f32
-        / (player.next_level - player.last_level) as f32;
+    let value =
+        (player.xp - player.last_level) as f32 / (player.next_level - player.last_level) as f32;
     render_bar(screen, value, 0, BLUE);
 }
 

@@ -274,7 +274,6 @@ impl Game {
         let height = win::iconvert_y(self.win.height);
         let width = win::iconvert_x(self.win.width);
 
-        // render
         self.win.fill(screen, [0x33, 0x88, 0x22]);
         self.win.circle(
             screen,
