@@ -201,13 +201,15 @@ impl Game {
         for enemy in self.enemies.iter_mut() {
             let dx = self.player.x - enemy.x;
             let dy = self.player.y - enemy.y;
+            let dx2 = dx * dx;
+            let dy2 = dy * dy;
 
             let size = enemy.t.size + self.player.size;
-            if dx * dx + dy * 2.0 * dy * 2.0 < size * size {
+            if dx2 + dy2 * 4.0 < size * size {
                 self.player.health -= enemy.t.power * dt;
             }
 
-            if dx * dx + dy * dy < self.player.damage_radius * self.player.damage_radius {
+            if dx2 + dy2 < self.player.damage_radius * self.player.damage_radius {
                 enemy.health -= self.player.power * dt;
             }
         }
@@ -246,7 +248,6 @@ impl Game {
     }
 
     pub fn step(&mut self, dt: f32, width: f32, height: f32) {
-        self.spawn_enemies(dt, width, height);
         self.move_player(dt);
         self.move_enemies(dt);
         self.despawn_enemies(width, height);
@@ -256,6 +257,7 @@ impl Game {
 
         self.player.recover(dt);
         self.player.levelup(&mut self.rng);
+        self.spawn_enemies(dt, width, height);
     }
 
     pub fn render(&mut self, win: &mut win::Window) {
