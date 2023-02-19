@@ -8,7 +8,7 @@ impl Rng {
     pub fn new() -> Self {
         let mut bytes = [0; 8];
         unsafe {
-            libc::getrandom(bytes.as_mut_ptr(), 8, 0x0001);
+            libc::getrandom(bytes.as_mut_ptr() as *mut libc::c_void, 8, 0x0001);
         }
         return Self {
             state: u64::from_ne_bytes(bytes),
