@@ -367,7 +367,7 @@ fn main() {
                     &mut screen,
                     width / 2.0,
                     height / 2.0,
-                    &sprites::HERO,
+                    &sprites::PLAYER,
                     player.face == Dir::Left,
                 );
                 player_rendered = true;
@@ -382,7 +382,7 @@ fn main() {
                 &mut screen,
                 width / 2.0,
                 height / 2.0,
-                &sprites::HERO,
+                &sprites::PLAYER,
                 player.face == Dir::Left,
             );
         }

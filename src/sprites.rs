@@ -4,7 +4,7 @@ pub const HEIGHT: usize = 24;
 pub const WIDTH: usize = 18;
 pub type Sprite = [[[u8; 3]; WIDTH]; HEIGHT];
 
-pub const HERO: Sprite = ppm::include_ppm!("hero");
+pub const PLAYER: Sprite = ppm::include_ppm!("player");
 pub const DIAMOND: Sprite = ppm::include_ppm!("diamond");
 
 pub const BAT: Sprite = ppm::include_ppm!("bat");
