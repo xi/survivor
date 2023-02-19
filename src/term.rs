@@ -10,20 +10,25 @@ fn get_terminal_size() -> (usize, usize) {
     return (w[1] as usize, w[0] as usize);
 }
 
-fn toggle_cursor(show: bool) {
-    if show {
+mod ti {
+    pub fn cnorm() {
         print!("\x1b[?25h");
-    } else {
+    }
+    pub fn civis() {
         print!("\x1b[?25l");
     }
-}
-
-fn set_bg(color: [u8; 3]) {
-    print!("\x1b[48;2;{};{};{}m", color[0], color[1], color[2]);
-}
-
-fn set_fg(color: [u8; 3]) {
-    print!("\x1b[38;2;{};{};{}m", color[0], color[1], color[2]);
+    pub fn cup(x: usize, y: usize) {
+        print!("\x1b[{};{}H", x + 1, y + 1);
+    }
+    pub fn setab(color: [u8; 3]) {
+        print!("\x1b[48;2;{};{};{}m", color[0], color[1], color[2]);
+    }
+    pub fn setaf(color: [u8; 3]) {
+        print!("\x1b[38;2;{};{};{}m", color[0], color[1], color[2]);
+    }
+    pub fn sgr0() {
+        println!("\x1b[0m");
+    }
 }
 
 fn block6(block: u32) -> char {
@@ -87,7 +92,7 @@ pub struct Screen {
 
 impl Drop for Screen {
     fn drop(&mut self) {
-        toggle_cursor(true);
+        ti::cnorm();
     }
 }
 
@@ -111,8 +116,8 @@ impl Screen {
         let mut prev_bg = [0x00, 0x00, 0x00];
         let mut prev_fg = [0xff, 0xff, 0xff];
 
-        print!("\x1b[H");
-        toggle_cursor(false);
+        ti::cup(0, 0);
+        ti::civis();
         for y in 0..(self.height / 3) {
             for x in 0..(self.width / 2) {
                 let (block, bg, fg) = get_block([
@@ -124,11 +129,11 @@ impl Screen {
                     self.pixels[y * 3 + 2][x * 2 + 1],
                 ]);
                 if bg != prev_bg {
-                    set_bg(bg);
+                    ti::setab(bg);
                     prev_bg = bg;
                 }
                 if fg != prev_fg {
-                    set_fg(fg);
+                    ti::setaf(fg);
                     prev_fg = fg;
                 }
                 print!("{}", block6(block));
@@ -138,7 +143,7 @@ impl Screen {
             }
         }
 
-        println!("\x1b[0m");
+        ti::sgr0();
     }
 
     pub fn convert_x(&self, x: f32) -> i64 {
