@@ -5,6 +5,7 @@ mod input;
 mod random;
 mod sprites;
 mod term;
+mod win;
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::{thread, time};
@@ -40,74 +41,6 @@ fn quit(_sig: i32) {
     RUNNING.fetch_and(false, Ordering::Relaxed);
 }
 
-fn fill(screen: &mut term::Screen, color: [u8; 3]) {
-    for y in 0..screen.height {
-        for x in 0..screen.width {
-            screen.set(x, y, color);
-        }
-    }
-}
-
-fn clear(screen: &mut term::Screen) {
-    fill(screen, [0x33, 0x88, 0x22]);
-}
-
-fn sprite(screen: &mut term::Screen, cx: f32, cy: f32, sprite: &sprites::Sprite, invert: bool) {
-    let x0 = screen.convert_x(cx) - sprites::WIDTH as i64 / 2;
-    let y0 = screen.convert_y(cy) + sprites::WIDTH as i64 / 2 - sprites::HEIGHT as i64;
-
-    for dy in 0..sprites::HEIGHT {
-        let y = y0 + dy as i64;
-        if y < 0 {
-            continue;
-        }
-        if y >= screen.height as i64 {
-            break;
-        }
-        for dx in 0..sprites::WIDTH {
-            let x = x0 + dx as i64;
-            if x < 0 {
-                continue;
-            }
-            if x >= screen.width as i64 {
-                break;
-            }
-            let cx = if invert { sprites::WIDTH - dx - 1 } else { dx };
-            let c = sprite[dy][cx];
-            if c != sprite[0][0] {
-                screen.set(x as usize, y as usize, c);
-            }
-        }
-    }
-}
-
-fn circle(screen: &mut term::Screen, cx: f32, cy: f32, r: f32, color: [u8; 3]) {
-    let r2 = r * r;
-
-    let y0 = screen
-        .convert_y(cy - r)
-        .max(0)
-        .min(screen.height as i64 - 1) as usize;
-    let x0 = screen.convert_x(cx - r).max(0).min(screen.width as i64 - 1) as usize;
-
-    let y1 = screen
-        .convert_y(cy + r)
-        .max(0)
-        .min(screen.height as i64 - 1) as usize;
-    let x1 = screen.convert_x(cx + r).max(0).min(screen.width as i64 - 1) as usize;
-
-    for y in y0..=y1 {
-        let dy = screen.iconvert_y(y) - cy;
-        let y2 = dy * dy;
-        for x in x0..=x1 {
-            let dx = screen.iconvert_x(x) - cx;
-            if dx * dx + y2 <= r2 {
-                screen.set(x, y, color);
-            }
-        }
-    }
-}
-
 struct Diamond {
     pub x: f32,
     pub y: f32,
@@ -134,9 +67,15 @@ struct Player {
 fn main() {
     let input = input::Input::new();
     let mut screen = term::Screen::new();
+    let win = win::Window {
+        width: screen.width,
+        height: screen.height - 6,
+        dx: 0,
+        dy: 3,
+    };
     let mut rng = random::Rng::new();
-    let width = screen.iconvert_x(screen.width);
-    let height = screen.iconvert_y(screen.height);
+    let width = screen.iconvert_x(win.width);
+    let height = screen.iconvert_y(win.height);
     let sprite_width = screen.iconvert_x(sprites::WIDTH);
     let sprite_height = screen.iconvert_y(sprites::HEIGHT);
     let mut enemies: Vec<enemies::Enemy> = vec![];
@@ -337,8 +276,8 @@ fn main() {
         }
 
         // render
-        clear(&mut screen);
-        circle(
+        win.fill(&mut screen, [0x33, 0x88, 0x22]);
+        win.circle(
             &mut screen,
             width / 2.0,
             height / 2.0,
@@ -349,14 +288,14 @@ fn main() {
         for diamond in diamonds.iter() {
             let sx = diamond.x - player.x + width / 2.0;
             let sy = diamond.y - player.y + height / 2.0;
-            sprite(&mut screen, sx, sy, &sprites::DIAMOND, false);
+            win.sprite(&mut screen, sx, sy, &sprites::DIAMOND, false);
         }
 
         enemies.sort_unstable_by_key(|e| e.y as i32);
         let mut player_rendered = false;
         for enemy in enemies.iter() {
             if !player_rendered && enemy.y > player.y {
-                sprite(
+                win.sprite(
                     &mut screen,
                     width / 2.0,
                     height / 2.0,
@@ -368,10 +307,10 @@ fn main() {
 
             let sx = enemy.x - player.x + width / 2.0;
             let sy = enemy.y - player.y + height / 2.0;
-            sprite(&mut screen, sx, sy, enemy.t.sprite, enemy.x > player.x);
+            win.sprite(&mut screen, sx, sy, enemy.t.sprite, enemy.x > player.x);
         }
         if !player_rendered {
-            sprite(
+            win.sprite(
                 &mut screen,
                 width / 2.0,
                 height / 2.0,
