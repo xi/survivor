@@ -5,5 +5,5 @@ survivor: src/main.rs src/input.rs src/random.rs src/term.rs src/enemies.rs src/
 lib%.rlib: src/%.rs
 	rustc $< --crate-type lib
 
-libppm.so: ppm.rs
-	rustc ppm.rs --crate-type proc-macro
+libppm.so: ppm/src/lib.rs
+	rustc ppm/src/lib.rs --crate-type proc-macro --crate-name=ppm

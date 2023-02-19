@@ -24,7 +24,7 @@ fn group(items: Vec<TokenTree>) -> TokenTree {
 pub fn include_ppm(input: TokenStream) -> TokenStream {
     let s = input.into_iter().next().unwrap().to_string();
     let name = s.strip_prefix('"').unwrap().strip_suffix('"').unwrap();
-    let p = format!("ppm/{}.ppm", name);
+    let p = format!("img/{}.ppm", name);
 
     let path = std::path::Path::new(&p);
     let file = File::open(path).unwrap();
