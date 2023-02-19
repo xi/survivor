@@ -22,14 +22,13 @@ pub enum Dir {
     Stop,
 }
 
-pub struct Diamond {
+pub struct Pos {
     pub x: f32,
     pub y: f32,
 }
 
 pub struct Player {
-    pub x: f32,
-    pub y: f32,
+    pub p: Pos,
     pub dir: Dir,
     pub face: Dir,
     pub speed: f32,
@@ -48,8 +47,7 @@ pub struct Player {
 impl Player {
     pub fn new() -> Self {
         return Self {
-            x: 0.0,
-            y: 0.0,
+            p: Pos { x: 0.0, y: 0.0 },
             dir: Dir::Stop,
             face: Dir::Right,
             speed: 30.0,
@@ -105,7 +103,7 @@ impl Player {
 
 pub struct Game {
     pub player: Player,
-    pub diamonds: Vec<Diamond>,
+    pub diamonds: Vec<Pos>,
     pub enemies: Vec<enemies::Enemy>,
     pub i_enemy: usize,
     rng: random::Rng,
@@ -124,10 +122,10 @@ impl Game {
 
     fn move_player(&mut self, dt: f32) {
         match self.player.dir {
-            Dir::Up => self.player.y -= self.player.speed * dt,
-            Dir::Right => self.player.x += self.player.speed * dt,
-            Dir::Down => self.player.y += self.player.speed * dt,
-            Dir::Left => self.player.x -= self.player.speed * dt,
+            Dir::Up => self.player.p.y -= self.player.speed * dt,
+            Dir::Right => self.player.p.x += self.player.speed * dt,
+            Dir::Down => self.player.p.y += self.player.speed * dt,
+            Dir::Left => self.player.p.x -= self.player.speed * dt,
             Dir::Stop => {}
         };
     }
@@ -136,8 +134,8 @@ impl Game {
         for i in 0..self.enemies.len() {
             let enemy = &self.enemies[i];
 
-            let dxp = self.player.x - enemy.x;
-            let dyp = self.player.y - enemy.y;
+            let dxp = self.player.p.x - enemy.p.x;
+            let dyp = self.player.p.y - enemy.p.y;
             let dp = (dxp * dxp + dyp * dyp).sqrt();
 
             let mut dx = dxp / dp;
@@ -147,8 +145,8 @@ impl Game {
                 if i != j {
                     let other = &self.enemies[j];
 
-                    let dxm = other.x - enemy.x;
-                    let dym = other.y - enemy.y;
+                    let dxm = other.p.x - enemy.p.x;
+                    let dym = other.p.y - enemy.p.y;
                     let dm = (dxm * dxm + dym * dym).sqrt();
 
                     if dm < enemy.t.size + other.t.size {
@@ -163,8 +161,8 @@ impl Game {
             dy /= d;
 
             let mut enemy = &mut self.enemies[i];
-            enemy.x += dx * enemy.t.speed * dt;
-            enemy.y += dy * enemy.t.speed * dt;
+            enemy.p.x += dx * enemy.t.speed * dt;
+            enemy.p.y += dy * enemy.t.speed * dt;
         }
     }
 
@@ -182,8 +180,8 @@ impl Game {
             };
 
             self.enemies.push(enemies::get_enemy(
-                spawn_x + self.player.x - width / 2.0,
-                spawn_y + self.player.y - height / 2.0,
+                spawn_x + self.player.p.x - width / 2.0,
+                spawn_y + self.player.p.y - height / 2.0,
                 self.i_enemy,
             ));
             self.i_enemy += 1;
@@ -193,14 +191,16 @@ impl Game {
     fn despawn_enemies(&mut self, width: f32, height: f32) {
         self.enemies = std::mem::take(&mut self.enemies)
             .into_iter()
-            .filter(|e| (e.y - self.player.y).abs() < height && (e.x - self.player.x).abs() < width)
+            .filter(|e| {
+                (e.p.y - self.player.p.y).abs() < height && (e.p.x - self.player.p.x).abs() < width
+            })
             .collect();
     }
 
     fn apply_damage(&mut self, dt: f32) {
         for enemy in self.enemies.iter_mut() {
-            let dx = self.player.x - enemy.x;
-            let dy = self.player.y - enemy.y;
+            let dx = self.player.p.x - enemy.p.x;
+            let dy = self.player.p.y - enemy.p.y;
             let dx2 = dx * dx;
             let dy2 = dy * dy;
 
@@ -218,9 +218,9 @@ impl Game {
             .into_iter()
             .filter(|enemy| {
                 if enemy.health <= 0.0 {
-                    self.diamonds.push(Diamond {
-                        x: enemy.x,
-                        y: enemy.y,
+                    self.diamonds.push(Pos {
+                        x: enemy.p.x,
+                        y: enemy.p.y,
                     });
                     return false;
                 } else {
@@ -234,8 +234,8 @@ impl Game {
         self.diamonds = std::mem::take(&mut self.diamonds)
             .into_iter()
             .filter(|diamond| {
-                let dx = self.player.x - diamond.x;
-                let dy = self.player.y - diamond.y;
+                let dx = self.player.p.x - diamond.x;
+                let dy = self.player.p.y - diamond.y;
                 let d = dx * dx + dy * dy;
                 if d < self.player.diamond_radius * self.player.diamond_radius {
                     self.player.xp += 1;
@@ -263,8 +263,8 @@ impl Game {
     pub fn render(&mut self, win: &mut win::Window) {
         let height = win::iconvert_y(win.height);
         let width = win::iconvert_x(win.width);
-        let dx = width / 2.0 - self.player.x;
-        let dy = height / 2.0 - self.player.y;
+        let dx = width / 2.0 - self.player.p.x;
+        let dy = height / 2.0 - self.player.p.y;
 
         win.fill([0x33, 0x88, 0x22]);
         win.circle(
@@ -279,9 +279,9 @@ impl Game {
         }
 
         let mut player_rendered = false;
-        self.enemies.sort_unstable_by_key(|e| e.y as i32);
+        self.enemies.sort_unstable_by_key(|e| e.p.y as i32);
         for enemy in self.enemies.iter() {
-            if !player_rendered && enemy.y > self.player.y {
+            if !player_rendered && enemy.p.y > self.player.p.y {
                 win.sprite(
                     width / 2.0,
                     height / 2.0,
@@ -292,10 +292,10 @@ impl Game {
             }
 
             win.sprite(
-                enemy.x + dx,
-                enemy.y + dy,
+                enemy.p.x + dx,
+                enemy.p.y + dy,
                 enemy.t.sprite,
-                enemy.x > self.player.x,
+                enemy.p.x > self.player.p.x,
             );
         }
         if !player_rendered {

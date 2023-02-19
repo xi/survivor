@@ -1,5 +1,6 @@
 // https://vampire-survivors.fandom.com/wiki/Enemies
 
+use crate::game::Pos;
 use crate::sprites;
 
 pub struct EnemyType {
@@ -11,8 +12,7 @@ pub struct EnemyType {
 }
 
 pub struct Enemy {
-    pub x: f32,
-    pub y: f32,
+    pub p: Pos,
     pub health: f32,
     pub t: &'static EnemyType,
 }
@@ -154,8 +154,7 @@ pub fn get_enemy(x: f32, y: f32, i: usize) -> Enemy {
     let t = wave[i % wave.len()];
 
     return Enemy {
-        x: x,
-        y: y,
+        p: Pos { x: x, y: y },
         health: t.health,
         t: t,
     };
