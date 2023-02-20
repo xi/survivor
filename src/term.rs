@@ -1,11 +1,16 @@
 extern crate libc;
 
 fn get_terminal_size() -> (usize, usize) {
-    let w = [0u16; 4];
+    let w: libc::winsize = libc::winsize {
+        ws_col: 0,
+        ws_row: 0,
+        ws_ypixel: 0,
+        ws_xpixel: 0,
+    };
     unsafe {
         libc::ioctl(1, libc::TIOCGWINSZ, &w);
     }
-    return (w[1] as usize, w[0] as usize);
+    return (w.ws_col as usize, w.ws_row as usize);
 }
 
 mod ti {
