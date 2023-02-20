@@ -18,6 +18,9 @@ mod ti {
     pub fn cup(x: usize, y: usize) {
         print!("\x1b[{};{}H", x + 1, y + 1);
     }
+    pub fn ed() {
+        print!("\x1b[2J");
+    }
     pub fn setab(color: [u8; 3]) {
         print!("\x1b[48;2;{};{};{}m", color[0], color[1], color[2]);
     }
@@ -101,6 +104,7 @@ impl Screen {
         let width = w * 2;
         let height = (h - 1) * 3;
         ti::civis();
+        ti::ed();
         return Screen {
             width: width,
             height: height,
