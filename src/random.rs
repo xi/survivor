@@ -6,9 +6,10 @@ pub struct Rng {
 
 impl Rng {
     pub fn new() -> Self {
-        let mut bytes = [0; 8];
+        let mut bytes = [0u8; 8];
         unsafe {
-            libc::getrandom(bytes.as_mut_ptr() as *mut libc::c_void, 8, 0x0001);
+            let ptr = bytes.as_mut_ptr() as *mut libc::c_void;
+            libc::getrandom(ptr, bytes.len(), libc::GRND_RANDOM);
         }
         return Self {
             state: u64::from_ne_bytes(bytes),
