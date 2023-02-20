@@ -69,6 +69,11 @@ The game is designed to run on 30fps. The amount of computation that needs to
 be done scales with the size of the window. So if you get a bad frame rate,
 there is a good chance that it will improve if you reduce the window size.
 
+### Things are stretched in one direction, circles are ovals
+
+The aspect ratio of pixels depends on the font. You can adjust
+`win::ASPECT_RATIO` to compensate for that.
+
 ## TODO (patches welcome)
 
 -	Add more weapons

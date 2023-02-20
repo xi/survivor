@@ -1,14 +1,14 @@
 use crate::sprites;
 use crate::term::Screen;
 
-const Y_FACTOR: f32 = 1.4;
+const ASPECT_RATIO: f32 = 1.4;
 
 pub fn convert_x(x: f32) -> i64 {
     return x as i64;
 }
 
 pub fn convert_y(y: f32) -> i64 {
-    return (y / Y_FACTOR) as i64;
+    return (y / ASPECT_RATIO) as i64;
 }
 
 pub fn iconvert_x(x: usize) -> f32 {
@@ -16,7 +16,7 @@ pub fn iconvert_x(x: usize) -> f32 {
 }
 
 pub fn iconvert_y(y: usize) -> f32 {
-    return y as f32 * Y_FACTOR;
+    return y as f32 * ASPECT_RATIO;
 }
 
 pub struct Window<'a> {
