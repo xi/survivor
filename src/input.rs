@@ -7,7 +7,7 @@ pub struct Input {
 }
 
 impl Input {
-    pub fn new() -> Input {
+    pub fn new() -> Self {
         let mut t = libc::termios {
             c_iflag: 0,
             c_oflag: 0,
@@ -22,7 +22,7 @@ impl Input {
             libc::tcgetattr(0, &mut t);
         }
 
-        let input = Input { termios: t };
+        let input = Self { termios: t };
         input.cbreak();
         return input;
     }

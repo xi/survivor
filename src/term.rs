@@ -104,8 +104,8 @@ impl Drop for Screen {
 }
 
 impl Screen {
-    pub fn new() -> Screen {
-        let mut screen = Screen { width: 0, height: 0, pixels: vec![] };
+    pub fn new() -> Self {
+        let mut screen = Self { width: 0, height: 0, pixels: vec![] };
         screen.resize();
         ti::civis();
         ti::ed();
