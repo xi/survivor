@@ -8,17 +8,9 @@ pub struct Input {
 
 impl Input {
     pub fn new() -> Self {
-        let mut t = libc::termios {
-            c_iflag: 0,
-            c_oflag: 0,
-            c_cflag: 0,
-            c_lflag: 0,
-            c_line: 0,
-            c_cc: [0; 32],
-            c_ispeed: 0,
-            c_ospeed: 0,
-        };
+        let mut t: libc::termios;
         unsafe {
+            t = std::mem::zeroed();
             libc::tcgetattr(0, &mut t);
         }
 
