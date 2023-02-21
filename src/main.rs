@@ -18,9 +18,14 @@ const RED: [u8; 3] = [0xff, 0x00, 0x00];
 const BLUE: [u8; 3] = [0x00, 0x00, 0xff];
 
 static RUNNING: AtomicBool = AtomicBool::new(true);
+static NEED_RESIZE: AtomicBool = AtomicBool::new(false);
 
 fn quit(_sig: libc::c_int) {
-    RUNNING.fetch_and(false, Ordering::Relaxed);
+    RUNNING.store(false, Ordering::Relaxed);
+}
+
+fn resize(_sig: libc::c_int) {
+    NEED_RESIZE.store(true, Ordering::Relaxed);
 }
 
 fn render_bar(screen: &mut term::Screen, value: f32, y0: usize, color: [u8; 3]) {
@@ -50,6 +55,7 @@ fn main() {
 
     unsafe {
         libc::signal(libc::SIGINT, quit as libc::sighandler_t);
+        libc::signal(libc::SIGWINCH, resize as libc::sighandler_t);
     }
 
     let mut time0 = time::Instant::now();
@@ -74,6 +80,11 @@ fn main() {
                 b'q' => quit(0),
                 _ => {}
             }
+        }
+
+        if NEED_RESIZE.load(Ordering::Relaxed) {
+            screen.resize();
+            NEED_RESIZE.store(false, Ordering::Relaxed);
         }
 
         let mut win = win::Window {

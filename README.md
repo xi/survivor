@@ -81,5 +81,4 @@ The aspect ratio of pixels depends on the font. You can adjust
 -	Improve balancing
 -	Add tarain
 -	More enemy waves
--	Adapt to terminal size change
 -	Sound

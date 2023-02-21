@@ -105,16 +105,18 @@ impl Drop for Screen {
 
 impl Screen {
     pub fn new() -> Screen {
-        let (w, h) = get_terminal_size();
-        let width = w * 2;
-        let height = (h - 1) * 3;
+        let mut screen = Screen { width: 0, height: 0, pixels: vec![] };
+        screen.resize();
         ti::civis();
         ti::ed();
-        return Screen {
-            width: width,
-            height: height,
-            pixels: vec![vec![[0, 0, 0]; width]; height],
-        };
+        return screen;
+    }
+
+    pub fn resize(&mut self) {
+        let (w, h) = get_terminal_size();
+        self.width = w * 2;
+        self.height = (h - 1) * 3;
+        self.pixels = vec![vec![[0, 0, 0]; self.width]; self.height];
     }
 
     pub fn set(&mut self, x: usize, y: usize, color: [u8; 3]) {
