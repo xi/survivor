@@ -19,7 +19,7 @@ const BLUE: [u8; 3] = [0x00, 0x00, 0xff];
 
 static RUNNING: AtomicBool = AtomicBool::new(true);
 
-fn quit(_sig: i32) {
+fn quit(_sig: libc::c_int) {
     RUNNING.fetch_and(false, Ordering::Relaxed);
 }
 
@@ -49,7 +49,7 @@ fn main() {
     let mut game = game::Game::new();
 
     unsafe {
-        libc::signal(libc::SIGINT, quit as usize);
+        libc::signal(libc::SIGINT, quit as libc::sighandler_t);
     }
 
     let mut time0 = time::Instant::now();
