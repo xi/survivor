@@ -74,6 +74,28 @@ there is a good chance that it will improve if you reduce the window size.
 The aspect ratio of pixels depends on the font. You can adjust
 `win::ASPECT_RATIO` to compensate for that.
 
+## Brief tour of the code
+
+-	`src/main.rs` contains the main loop.
+-	`src/game.rs` contains most of the game logic.
+-	`src/input.rs`, `src/random.rs`, and `src/term,rs` wrap unsafe libc functions
+	for low level functionality.
+-	`src/enemies.rs`  contains all the enemy types as well as the waves in which
+	they appear.
+-	`src/sprites.rs` contains all graphics. The sprites are stored in
+	[ppm](https://en.wikipedia.org/wiki/Netpbm_format) files and converted to
+	rust arrays by the `include_ppm!()` macro. That way all graphics are included
+	in the binary. The color of the first pixel in a sprite is considered
+	transparent.
+-	`src/win.rs` contains some drawing primitives as well as the conversion
+	between logical positions and screen pixels.
+
+Most game logic is expressed as `f32`. Positions represet the logical center of
+objects. When drawing to the screen, the `f32` positions are converted to
+`usize` pixels. Game logic is mostly independent of pixels though. The only
+exceptions are that enemy spawn and despawn outside of the screen, so they
+depend on the screen size.
+
 ## TODO (patches welcome)
 
 -	Add more weapons
