@@ -33,7 +33,7 @@ mod ti {
     }
 }
 
-fn block6(block: u32) -> char {
+fn sextant(block: u32) -> char {
     if block == 0b000000 {
         return ' ';
     } else if block < 0b010101 {
@@ -142,7 +142,7 @@ impl Screen {
                     ti::setaf(fg);
                     prev_fg = fg;
                 }
-                print!("{}", block6(block));
+                print!("{}", sextant(block));
             }
             if y != self.height / 3 - 1 {
                 print!("\n");
