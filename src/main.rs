@@ -6,6 +6,7 @@ mod input;
 mod random;
 mod sprites;
 mod term;
+mod weapons;
 mod win;
 
 use std::sync::atomic::{AtomicBool, Ordering};

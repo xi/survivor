@@ -1,6 +1,7 @@
 use crate::enemies;
 use crate::random;
 use crate::sprites;
+use crate::weapons;
 use crate::win;
 
 const MAX_ENEMIES: usize = 200;
@@ -96,6 +97,7 @@ pub struct Game {
     pub player: Player,
     pub diamonds: Vec<Pos>,
     pub enemies: Vec<enemies::Enemy>,
+    pub projectiles: Vec<weapons::Projectile>,
     pub i_enemy: usize,
     rng: random::Rng,
 }
@@ -104,6 +106,7 @@ impl Game {
     pub fn new() -> Self {
         return Self {
             enemies: vec![],
+            projectiles: vec![],
             diamonds: vec![],
             i_enemy: 0,
             player: Player::new(),
