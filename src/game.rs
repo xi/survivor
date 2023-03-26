@@ -47,6 +47,7 @@ pub struct Player {
     pub health_max: f32,
     pub health_recover: f32,
     pub power: f32,
+    pub weapons: Vec<weapons::Weapon>,
     pub damage_radius: f32,
     pub diamond_radius: f32,
     pub xp: f32,
@@ -67,6 +68,9 @@ impl Player {
             health_max: 50.0,
             health_recover: 0.0,
             power: 10.0,
+            weapons: vec![
+                weapons::Weapon::new(&weapons::KNIFE),
+            ],
             damage_radius: 30.0,
             diamond_radius: 15.0,
             xp: 0.0,
@@ -106,9 +110,6 @@ pub struct Game {
     pub player: Player,
     pub diamonds: Vec<Pos>,
     pub enemies: Vec<enemies::Enemy>,
-    pub projectiles: Vec<weapons::Projectile>,
-    pub projectiles_cooldown: f32,
-    pub projectiles_last: f32,
     pub i_enemy: usize,
     rng: random::Rng,
 }
@@ -117,9 +118,6 @@ impl Game {
     pub fn new() -> Self {
         return Self {
             enemies: vec![],
-            projectiles: vec![],
-            projectiles_last: 0.0,
-            projectiles_cooldown: 4.0,
             diamonds: vec![],
             i_enemy: 0,
             player: Player::new(),
@@ -174,12 +172,14 @@ impl Game {
     }
 
     fn move_projectiles(&mut self, dt: f32) {
-        for projectile in self.projectiles.iter_mut() {
-            match projectile.dir {
-                Dir::Up => projectile.p.y -= projectile.t.speed * dt,
-                Dir::Right => projectile.p.x += projectile.t.speed * dt,
-                Dir::Down => projectile.p.y += projectile.t.speed * dt,
-                Dir::Left => projectile.p.x -= projectile.t.speed * dt,
+        for weapon in self.player.weapons.iter_mut() {
+            for projectile in weapon.projectiles.iter_mut() {
+                match projectile.dir {
+                    Dir::Up => projectile.p.y -= weapon.speed * dt,
+                    Dir::Right => projectile.p.x += weapon.speed * dt,
+                    Dir::Down => projectile.p.y += weapon.speed * dt,
+                    Dir::Left => projectile.p.x -= weapon.speed * dt,
+                }
             }
         }
     }
@@ -216,28 +216,31 @@ impl Game {
     }
 
     fn spawn_projectiles(&mut self, dt: f32) {
-        self.projectiles_last += dt;
-        if self.projectiles_last > self.projectiles_cooldown {
-            self.projectiles_last -= self.projectiles_cooldown;
-            self.projectiles.push(weapons::Projectile {
-                p: self.player.p,
-                dir: match &self.player.dir {
-                    Some(dir) => dir.clone(),
-                    None => self.player.face,
-                },
-                t: &weapons::KNIFE,
-            });
+        for weapon in self.player.weapons.iter_mut() {
+            weapon.last += dt;
+            if weapon.last > weapon.cooldown {
+                weapon.last -= weapon.cooldown;
+                weapon.projectiles.push(weapons::Projectile {
+                    p: self.player.p,
+                    dir: match &self.player.dir {
+                        Some(dir) => dir.clone(),
+                        None => self.player.face,
+                    },
+                });
+            }
         }
     }
 
     fn despawn_projectiles(&mut self, width: f32, height: f32) {
-        self.projectiles = std::mem::take(&mut self.projectiles)
-            .into_iter()
-            .filter(|proj| {
-                (proj.p.y - self.player.p.y).abs() < height
-                    && (proj.p.x - self.player.p.x).abs() < width
-            })
-            .collect();
+        for weapon in self.player.weapons.iter_mut() {
+            weapon.projectiles = std::mem::take(&mut weapon.projectiles)
+                .into_iter()
+                .filter(|proj| {
+                    (proj.p.y - self.player.p.y).abs() < height
+                        && (proj.p.x - self.player.p.x).abs() < width
+                })
+                .collect();
+        }
     }
 
     fn apply_damage(&mut self, dt: f32) {
@@ -255,10 +258,12 @@ impl Game {
             if dx2 + dy2 < self.player.damage_radius * self.player.damage_radius {
                 enemy.health -= self.player.power * dt;
             }
-            for projectile in self.projectiles.iter() {
-                let projectile_size = enemy.t.size + projectile.t.size;
-                if projectile.p.in_radius(&enemy.p, projectile_size) {
-                    enemy.health -= projectile.t.damage * self.player.power * dt;
+            for weapon in self.player.weapons.iter() {
+                for projectile in weapon.projectiles.iter() {
+                    let projectile_size = enemy.t.size + weapon.t.size;
+                    if projectile.p.in_radius(&enemy.p, projectile_size) {
+                        enemy.health -= weapon.damage * self.player.power * dt;
+                    }
                 }
             }
         }
@@ -356,13 +361,15 @@ impl Game {
             );
         }
 
-        for projectile in self.projectiles.iter() {
-            win.sprite(
-                projectile.p.x + dx,
-                projectile.p.y + dy,
-                projectile.t.sprite,
-                projectile.dir,
-            );
+        for weapon in self.player.weapons.iter() {
+            for projectile in weapon.projectiles.iter() {
+                win.sprite(
+                    projectile.p.x + dx,
+                    projectile.p.y + dy,
+                    weapon.t.sprite,
+                    projectile.dir,
+                );
+            }
         }
     }
 }
