@@ -300,5 +300,14 @@ impl Game {
                 self.player.face == Dir::Left,
             );
         }
+
+        for projectile in self.projectiles.iter() {
+            win.sprite(
+                projectile.p.x + dx,
+                projectile.p.y + dy,
+                projectile.t.sprite,
+                false,
+            );
+        }
     }
 }
