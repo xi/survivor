@@ -165,6 +165,17 @@ impl Game {
         }
     }
 
+    fn move_projectiles(&mut self, dt: f32) {
+        for projectile in self.projectiles.iter_mut() {
+            match projectile.dir {
+                Dir::Up => projectile.p.y -= projectile.t.speed * dt,
+                Dir::Right => projectile.p.x += projectile.t.speed * dt,
+                Dir::Down => projectile.p.y += projectile.t.speed * dt,
+                Dir::Left => projectile.p.x -= projectile.t.speed * dt,
+            }
+        }
+    }
+
     fn spawn_enemies(&mut self, dt: f32, width: f32, height: f32) {
         let sprite_height = win::iconvert_y(sprites::HEIGHT);
         let sprite_width = win::iconvert_x(sprites::WIDTH);
@@ -286,6 +297,7 @@ impl Game {
     pub fn step(&mut self, dt: f32, width: f32, height: f32) {
         self.move_player(dt);
         self.move_enemies(dt);
+        self.move_projectiles(dt);
         self.despawn_enemies(width, height);
         self.despawn_projectiles(width, height);
 
