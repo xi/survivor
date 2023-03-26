@@ -15,7 +15,7 @@ const PERK_RECOVER: usize = 5;
 const PERK_ATTRACT: usize = 6;
 const PERK_XP: usize = 7;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone, Copy)]
 pub enum Dir {
     Up,
     Right,
@@ -23,6 +23,7 @@ pub enum Dir {
     Left,
 }
 
+#[derive(Clone, Copy)]
 pub struct Pos {
     pub x: f32,
     pub y: f32,
@@ -98,6 +99,8 @@ pub struct Game {
     pub diamonds: Vec<Pos>,
     pub enemies: Vec<enemies::Enemy>,
     pub projectiles: Vec<weapons::Projectile>,
+    pub projectiles_cooldown: f32,
+    pub projectiles_last: f32,
     pub i_enemy: usize,
     rng: random::Rng,
 }
@@ -107,6 +110,8 @@ impl Game {
         return Self {
             enemies: vec![],
             projectiles: vec![],
+            projectiles_last: 0.0,
+            projectiles_cooldown: 4.0,
             diamonds: vec![],
             i_enemy: 0,
             player: Player::new(),
@@ -191,6 +196,31 @@ impl Game {
             .collect();
     }
 
+    fn spawn_projectiles(&mut self, dt: f32) {
+        self.projectiles_last += dt;
+        if self.projectiles_last > self.projectiles_cooldown {
+            self.projectiles_last -= self.projectiles_cooldown;
+            self.projectiles.push(weapons::Projectile {
+                p: self.player.p,
+                dir: match &self.player.dir {
+                    Some(dir) => dir.clone(),
+                    None => self.player.face,
+                },
+                t: &weapons::KNIFE,
+            });
+        }
+    }
+
+    fn despawn_projectiles(&mut self, width: f32, height: f32) {
+        self.projectiles = std::mem::take(&mut self.projectiles)
+            .into_iter()
+            .filter(|proj| {
+                (proj.p.y - self.player.p.y).abs() < height
+                    && (proj.p.x - self.player.p.x).abs() < width
+            })
+            .collect();
+    }
+
     fn apply_damage(&mut self, dt: f32) {
         for enemy in self.enemies.iter_mut() {
             let dx = self.player.p.x - enemy.p.x;
@@ -257,6 +287,7 @@ impl Game {
         self.move_player(dt);
         self.move_enemies(dt);
         self.despawn_enemies(width, height);
+        self.despawn_projectiles(width, height);
 
         self.apply_damage(dt);
         self.pick_diamonds();
@@ -264,6 +295,7 @@ impl Game {
         self.player.recover(dt);
         self.player.levelup(&mut self.rng);
         self.spawn_enemies(dt, width, height);
+        self.spawn_projectiles(dt);
     }
 
     pub fn render(&mut self, win: &mut win::Window) {
