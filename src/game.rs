@@ -256,7 +256,7 @@ impl Game {
                 let projectile_size2 = projectile_size * projectile_size;
 
                 if projectile_dx2 + projectile_dy2 < projectile_size2 {
-                    enemy.health -= projectile.t.power * dt;
+                    enemy.health -= projectile.t.damage * self.player.power * dt;
                 }
             }
         }
