@@ -69,7 +69,10 @@ impl Player {
             health_recover: 0.0,
             power: 10.0,
             weapons: vec![
+                weapons::Weapon::new(&weapons::AXE),
                 weapons::Weapon::new(&weapons::KNIFE),
+                weapons::Weapon::new(&weapons::STAR),
+                weapons::Weapon::new(&weapons::WIND),
             ],
             damage_radius: 30.0,
             diamond_radius: 15.0,

@@ -98,7 +98,6 @@ depend on the screen size.
 
 ## TODO (patches welcome)
 
--	Add more weapons
 -	Let the player pick a perk on level up
 -	Improve balancing
 -	Add tarain
