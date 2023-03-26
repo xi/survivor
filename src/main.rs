@@ -66,17 +66,17 @@ fn main() {
 
         while let Some(c) = input.getch() {
             match c {
-                b'w' | b'A' => game.player.dir = game::Dir::Up,
+                b'w' | b'A' => game.player.dir = Some(game::Dir::Up),
                 b'a' | b'D' => {
-                    game.player.dir = game::Dir::Left;
+                    game.player.dir = Some(game::Dir::Left);
                     game.player.face = game::Dir::Left
                 }
-                b's' | b'B' => game.player.dir = game::Dir::Down,
+                b's' | b'B' => game.player.dir = Some(game::Dir::Down),
                 b'd' | b'C' => {
-                    game.player.dir = game::Dir::Right;
+                    game.player.dir = Some(game::Dir::Right);
                     game.player.face = game::Dir::Right
                 }
-                b' ' => game.player.dir = game::Dir::Stop,
+                b' ' => game.player.dir = None,
                 b'q' => quit(0),
                 _ => {}
             }

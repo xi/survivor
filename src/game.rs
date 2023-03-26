@@ -20,7 +20,6 @@ pub enum Dir {
     Right,
     Down,
     Left,
-    Stop,
 }
 
 pub struct Pos {
@@ -30,7 +29,7 @@ pub struct Pos {
 
 pub struct Player {
     pub p: Pos,
-    pub dir: Dir,
+    pub dir: Option<Dir>,
     pub face: Dir,
     pub speed: f32,
     pub size: f32,
@@ -50,7 +49,7 @@ impl Player {
     pub fn new() -> Self {
         return Self {
             p: Pos { x: 0.0, y: 0.0 },
-            dir: Dir::Stop,
+            dir: None,
             face: Dir::Right,
             speed: 30.0,
             size: 9.0,
@@ -114,11 +113,11 @@ impl Game {
 
     fn move_player(&mut self, dt: f32) {
         match self.player.dir {
-            Dir::Up => self.player.p.y -= self.player.speed * dt,
-            Dir::Right => self.player.p.x += self.player.speed * dt,
-            Dir::Down => self.player.p.y += self.player.speed * dt,
-            Dir::Left => self.player.p.x -= self.player.speed * dt,
-            Dir::Stop => {}
+            Some(Dir::Up) => self.player.p.y -= self.player.speed * dt,
+            Some(Dir::Right) => self.player.p.x += self.player.speed * dt,
+            Some(Dir::Down) => self.player.p.y += self.player.speed * dt,
+            Some(Dir::Left) => self.player.p.x -= self.player.speed * dt,
+            None => {},
         };
     }
 
