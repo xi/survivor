@@ -325,7 +325,7 @@ impl Game {
         );
 
         for diamond in self.diamonds.iter() {
-            win.sprite(diamond.x + dx, diamond.y + dy, &sprites::DIAMOND, false);
+            win.sprite(diamond.x + dx, diamond.y + dy, &sprites::DIAMOND, Dir::Right);
         }
 
         let mut player_rendered = false;
@@ -336,7 +336,7 @@ impl Game {
                     width / 2.0,
                     height / 2.0,
                     &sprites::PLAYER,
-                    self.player.face == Dir::Left,
+                    self.player.face,
                 );
                 player_rendered = true;
             }
@@ -345,7 +345,7 @@ impl Game {
                 enemy.p.x + dx,
                 enemy.p.y + dy,
                 enemy.t.sprite,
-                enemy.p.x > self.player.p.x,
+                if enemy.p.x > self.player.p.x { Dir::Left } else { Dir::Right },
             );
         }
         if !player_rendered {
@@ -353,7 +353,7 @@ impl Game {
                 width / 2.0,
                 height / 2.0,
                 &sprites::PLAYER,
-                self.player.face == Dir::Left,
+                self.player.face,
             );
         }
 
@@ -362,7 +362,7 @@ impl Game {
                 projectile.p.x + dx,
                 projectile.p.y + dy,
                 projectile.t.sprite,
-                false,
+                projectile.dir,
             );
         }
     }

@@ -1,5 +1,6 @@
 use crate::sprites;
 use crate::term::Screen;
+use crate::game::Dir;
 
 const ASPECT_RATIO: f32 = 1.4;
 
@@ -40,9 +41,9 @@ impl Window<'_> {
         }
     }
 
-    pub fn sprite(&mut self, cx: f32, cy: f32, sprite: &sprites::Sprite, invert: bool) {
+    pub fn _sprite(&mut self, cx: f32, cy: f32, sprite: &sprites::Sprite, invert: bool) {
         let x0 = convert_x(cx) - sprites::WIDTH as i64 / 2;
-        let y0 = convert_y(cy) + sprites::WIDTH as i64 / 2 - sprites::HEIGHT as i64;
+        let y0 = convert_y(cy) - (sprites::HEIGHT as i64 - sprites::WIDTH as i64 / 2);
 
         for dy in 0..sprites::HEIGHT {
             let y = y0 + dy as i64;
@@ -66,6 +67,44 @@ impl Window<'_> {
                     self.set(x as usize, y as usize, c);
                 }
             }
+        }
+    }
+
+    pub fn _sprite_tilted(&mut self, cx: f32, cy: f32, sprite: &sprites::Sprite, invert: bool) {
+        let x0 = convert_x(cx) - sprites::WIDTH as i64 / 2;
+        let y0 = convert_y(cy) - sprites::WIDTH as i64 / 2;
+
+        for dy in 0..sprites::WIDTH {
+            let y = y0 + dy as i64;
+            if y < 0 {
+                continue;
+            }
+            if y >= self.height as i64 {
+                break;
+            }
+            for dx in 0..sprites::HEIGHT {
+                let x = x0 + dx as i64;
+                if x < 0 {
+                    continue;
+                }
+                if x >= self.width as i64 {
+                    break;
+                }
+                let cy = if invert {sprites::WIDTH - dy - 1 } else { dy };
+                let c = sprite[dx][cy];
+                if c != sprite[0][0] {
+                    self.set(x as usize, y as usize, c);
+                }
+            }
+        }
+    }
+
+    pub fn sprite(&mut self, cx: f32, cy: f32, sprite: &sprites::Sprite, face: Dir) {
+        match face {
+            Dir::Up => self._sprite_tilted(cx, cy, sprite, true),
+            Dir::Right => self._sprite(cx, cy, sprite, false),
+            Dir::Down => self._sprite_tilted(cx, cy, sprite, false),
+            Dir::Left => self._sprite(cx, cy, sprite, true),
         }
     }
 
