@@ -29,6 +29,14 @@ pub struct Pos {
     pub y: f32,
 }
 
+impl Pos {
+    pub fn in_radius(&self, other: &Self, d: f32) -> bool {
+        let dx = self.x - other.x;
+        let dy = self.y - other.y;
+        return dx * dx + dy * dy < d * d;
+    }
+}
+
 pub struct Player {
     pub p: Pos,
     pub dir: Option<Dir>,
@@ -248,14 +256,8 @@ impl Game {
                 enemy.health -= self.player.power * dt;
             }
             for projectile in self.projectiles.iter() {
-                let projectile_dx = projectile.p.x - enemy.p.x;
-                let projectile_dy = projectile.p.y - enemy.p.y;
                 let projectile_size = enemy.t.size + projectile.t.size;
-                let projectile_dx2 = projectile_dx * projectile_dx;
-                let projectile_dy2 = projectile_dy * projectile_dy;
-                let projectile_size2 = projectile_size * projectile_size;
-
-                if projectile_dx2 + projectile_dy2 < projectile_size2 {
+                if projectile.p.in_radius(&enemy.p, projectile_size) {
                     enemy.health -= projectile.t.damage * self.player.power * dt;
                 }
             }
@@ -281,10 +283,7 @@ impl Game {
         self.diamonds = std::mem::take(&mut self.diamonds)
             .into_iter()
             .filter(|diamond| {
-                let dx = self.player.p.x - diamond.x;
-                let dy = self.player.p.y - diamond.y;
-                let d = dx * dx + dy * dy;
-                if d < self.player.diamond_radius * self.player.diamond_radius {
+                if self.player.p.in_radius(&diamond, self.player.diamond_radius) {
                     self.player.xp += self.player.xp_factor;
                     return false;
                 } else {
