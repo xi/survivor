@@ -36,10 +36,34 @@ impl Weapon {
     }
 }
 
+pub const AXE: WeaponType = WeaponType {
+    base_speed: 150.0,
+    base_damage: 50.0,
+    base_cooldown: 10.0,
+    size: 7.0,
+    sprite: &sprites::AXE,
+};
+
 pub const KNIFE: WeaponType = WeaponType {
     base_speed: 200.0,
     base_damage: 30.0,
     base_cooldown: 4.0,
     size: 6.0,
     sprite: &sprites::KNIFE,
+};
+
+pub const STAR: WeaponType = WeaponType {
+    base_speed: 250.0,
+    base_damage: 20.0,
+    base_cooldown: 3.0,
+    size: 6.0,
+    sprite: &sprites::STAR,
+};
+
+pub const WIND: WeaponType = WeaponType {
+    base_speed: 100.0,
+    base_damage: 40.0,
+    base_cooldown: 9.0,
+    size: 8.0,
+    sprite: &sprites::WIND,
 };

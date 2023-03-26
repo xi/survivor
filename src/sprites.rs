@@ -7,7 +7,10 @@ pub type Sprite = [[[u8; 3]; WIDTH]; HEIGHT];
 pub const PLAYER: Sprite = ppm::include_ppm!("player");
 pub const DIAMOND: Sprite = ppm::include_ppm!("diamond");
 
+pub const AXE: Sprite = ppm::include_ppm!("axe");
 pub const KNIFE: Sprite = ppm::include_ppm!("knife");
+pub const STAR: Sprite = ppm::include_ppm!("star");
+pub const WIND: Sprite = ppm::include_ppm!("wind");
 
 pub const BAT: Sprite = ppm::include_ppm!("bat");
 pub const BAT2: Sprite = ppm::include_ppm!("bat2");
