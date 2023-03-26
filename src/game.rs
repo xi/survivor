@@ -206,6 +206,18 @@ impl Game {
             if dx2 + dy2 < self.player.damage_radius * self.player.damage_radius {
                 enemy.health -= self.player.power * dt;
             }
+            for projectile in self.projectiles.iter() {
+                let projectile_dx = projectile.p.x - enemy.p.x;
+                let projectile_dy = projectile.p.y - enemy.p.y;
+                let projectile_size = enemy.t.size + projectile.t.size;
+                let projectile_dx2 = projectile_dx * projectile_dx;
+                let projectile_dy2 = projectile_dy * projectile_dy;
+                let projectile_size2 = projectile_size * projectile_size;
+
+                if projectile_dx2 + projectile_dy2 < projectile_size2 {
+                    enemy.health -= projectile.t.power * dt;
+                }
+            }
         }
 
         self.enemies = std::mem::take(&mut self.enemies)
