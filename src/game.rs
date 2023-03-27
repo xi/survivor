@@ -177,12 +177,7 @@ impl Game {
     fn move_projectiles(&mut self, dt: f32) {
         for weapon in self.player.weapons.iter_mut() {
             for projectile in weapon.projectiles.iter_mut() {
-                match projectile.dir {
-                    Dir::Up => projectile.p.y -= weapon.speed * dt,
-                    Dir::Right => projectile.p.x += weapon.speed * dt,
-                    Dir::Down => projectile.p.y += weapon.speed * dt,
-                    Dir::Left => projectile.p.x -= weapon.speed * dt,
-                }
+                (weapon.t._move)(projectile, &self.player.p, weapon.speed, dt);
             }
         }
     }
