@@ -224,7 +224,10 @@ impl Game {
             if weapon.last > weapon.cooldown {
                 weapon.last -= weapon.cooldown;
                 weapon.projectiles.push(weapons::Projectile {
-                    p: self.player.p,
+                    p: Pos {
+                        x: self.player.p.x + self.rng.gen_f32() * 10.0 - 5.0,
+                        y: self.player.p.y + self.rng.gen_f32() * 10.0 - 5.0,
+                    },
                     dir: match &self.player.dir {
                         Some(dir) => dir.clone(),
                         None => self.player.face,
