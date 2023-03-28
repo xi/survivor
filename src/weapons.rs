@@ -40,7 +40,7 @@ impl Weapon {
     }
 }
 
-pub fn move_straight(projectile: &mut Projectile, center: &Pos, speed: f32, dt: f32) {
+pub fn move_straight(projectile: &mut Projectile, _center: &Pos, speed: f32, dt: f32) {
     match projectile.dir {
         Dir::Up => projectile.p.y -= speed * dt,
         Dir::Right => projectile.p.x += speed * dt,
