@@ -36,7 +36,7 @@ impl Weapon {
             last: 0.0,
             t: t,
             projectiles: vec![],
-        }
+        };
     }
 }
 
@@ -86,7 +86,11 @@ pub fn move_spiral(projectile: &mut Projectile, center: &Pos, speed: f32, dt: f3
     projectile.p.x = center.x + cos * r2;
     projectile.p.y = center.y + sin * r2;
 
-    projectile.dir = if projectile.p.y > center.y { Dir::Left } else { Dir::Right };
+    projectile.dir = if projectile.p.y > center.y {
+        Dir::Left
+    } else {
+        Dir::Right
+    };
 }
 
 pub const AXE: WeaponType = WeaponType {

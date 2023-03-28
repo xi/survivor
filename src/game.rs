@@ -134,7 +134,7 @@ impl Game {
             Some(Dir::Right) => self.player.p.x += self.player.speed * dt,
             Some(Dir::Down) => self.player.p.y += self.player.speed * dt,
             Some(Dir::Left) => self.player.p.x -= self.player.speed * dt,
-            None => {},
+            None => {}
         };
     }
 
@@ -332,7 +332,12 @@ impl Game {
         );
 
         for diamond in self.diamonds.iter() {
-            win.sprite(diamond.x + dx, diamond.y + dy, &sprites::DIAMOND, Dir::Right);
+            win.sprite(
+                diamond.x + dx,
+                diamond.y + dy,
+                &sprites::DIAMOND,
+                Dir::Right,
+            );
         }
 
         let mut player_rendered = false;
@@ -352,7 +357,11 @@ impl Game {
                 enemy.p.x + dx,
                 enemy.p.y + dy,
                 enemy.t.sprite,
-                if enemy.p.x > self.player.p.x { Dir::Left } else { Dir::Right },
+                if enemy.p.x > self.player.p.x {
+                    Dir::Left
+                } else {
+                    Dir::Right
+                },
             );
         }
         if !player_rendered {

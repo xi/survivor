@@ -1,6 +1,6 @@
+use crate::game::Dir;
 use crate::sprites;
 use crate::term::Screen;
-use crate::game::Dir;
 
 const ASPECT_RATIO: f32 = 1.4;
 
@@ -90,7 +90,7 @@ impl Window<'_> {
                 if x >= self.width as i64 {
                     break;
                 }
-                let cy = if invert {sprites::WIDTH - dy - 1 } else { dy };
+                let cy = if invert { sprites::WIDTH - dy - 1 } else { dy };
                 let c = sprite[dx][cy];
                 if c != sprite[0][0] {
                     self.set(x as usize, y as usize, c);
