@@ -92,13 +92,6 @@ pub struct Screen {
     pixels: Vec<Vec<[u8; 3]>>,
 }
 
-impl Drop for Screen {
-    fn drop(&mut self) {
-        ti::cnorm();
-        ti::sgr0();
-    }
-}
-
 impl Screen {
     pub fn new() -> Self {
         let mut screen = Self {
@@ -106,10 +99,19 @@ impl Screen {
             height: 0,
             pixels: vec![],
         };
-        screen.resize();
+        screen.init();
+        return screen;
+    }
+
+    pub fn init(&mut self) {
+        self.resize();
         ti::civis();
         ti::ed();
-        return screen;
+    }
+
+    pub fn restore(&self) {
+        ti::cnorm();
+        ti::sgr0();
     }
 
     pub fn resize(&mut self) {
@@ -154,5 +156,11 @@ impl Screen {
         }
 
         ti::sgr0();
+    }
+}
+
+impl Drop for Screen {
+    fn drop(&mut self) {
+        self.restore();
     }
 }

@@ -20,6 +20,7 @@ const BLUE: [u8; 3] = [0x00, 0x00, 0xff];
 
 static RUNNING: AtomicBool = AtomicBool::new(true);
 static NEED_RESIZE: AtomicBool = AtomicBool::new(false);
+static NEED_STOP: AtomicBool = AtomicBool::new(false);
 
 fn quit(_sig: libc::c_int) {
     RUNNING.store(false, Ordering::Relaxed);
@@ -27,6 +28,10 @@ fn quit(_sig: libc::c_int) {
 
 fn resize(_sig: libc::c_int) {
     NEED_RESIZE.store(true, Ordering::Relaxed);
+}
+
+fn stop(_sig: libc::c_int) {
+    NEED_STOP.store(true, Ordering::Relaxed);
 }
 
 fn render_bar(screen: &mut term::Screen, value: f32, y0: usize, color: [u8; 3]) {
@@ -62,17 +67,19 @@ fn signal(sig: libc::c_int, handler: libc::sighandler_t) {
 }
 
 fn main() {
-    let input = input::Input::new();
+    let pid = std::process::id();
+    let mut input = input::Input::new();
     let mut screen = term::Screen::new();
     let mut game = game::Game::new();
 
     signal(libc::SIGINT, quit as libc::sighandler_t);
     signal(libc::SIGWINCH, resize as libc::sighandler_t);
+    signal(libc::SIGTSTP, stop as libc::sighandler_t);
 
     let mut time0 = time::Instant::now();
 
     while RUNNING.load(Ordering::Relaxed) {
-        let time1 = time::Instant::now();
+        let mut time1 = time::Instant::now();
         let dt = (time1 - time0).as_secs_f32();
 
         while let Some(c) = input.getch() {
@@ -91,6 +98,22 @@ fn main() {
                 b'q' => quit(0),
                 _ => {}
             }
+        }
+
+        if NEED_STOP.load(Ordering::Relaxed) {
+            screen.restore();
+            input.restore();
+            signal(libc::SIGTSTP, libc::SIG_DFL);
+            unsafe {
+                libc::kill(pid as libc::c_int, libc::SIGTSTP);
+            }
+
+            // when SIGCONT is received
+            screen.init();
+            input.cbreak();
+            signal(libc::SIGTSTP, stop as libc::sighandler_t);
+            time1 = time::Instant::now();
+            NEED_STOP.store(false, Ordering::Relaxed);
         }
 
         if NEED_RESIZE.load(Ordering::Relaxed) {

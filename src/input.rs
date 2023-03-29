@@ -19,13 +19,19 @@ impl Input {
         return input;
     }
 
-    fn cbreak(&self) {
+    pub fn cbreak(&self) {
         let mut t = self.termios.clone();
         t.c_lflag &= !(libc::ICANON | libc::ECHO);
         t.c_cc[libc::VMIN] = 0;
         t.c_cc[libc::VTIME] = 0;
         unsafe {
             libc::tcsetattr(0, libc::TCSADRAIN, &t);
+        }
+    }
+
+    pub fn restore(&mut self) {
+        unsafe {
+            libc::tcsetattr(0, libc::TCSADRAIN, &self.termios);
         }
     }
 
@@ -51,8 +57,6 @@ impl Input {
 
 impl Drop for Input {
     fn drop(&mut self) {
-        unsafe {
-            libc::tcsetattr(0, libc::TCSADRAIN, &self.termios);
-        }
+        self.restore();
     }
 }
