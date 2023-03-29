@@ -49,15 +49,25 @@ fn render_health_bar(player: &game::Player, screen: &mut term::Screen) {
     render_bar(screen, value, screen.height - 3, RED);
 }
 
+fn signal(sig: libc::c_int, handler: libc::sighandler_t) {
+    let mut action: libc::sigaction;
+    unsafe {
+        action = std::mem::zeroed();
+        action.sa_sigaction = handler;
+        libc::sigemptyset(&mut action.sa_mask);
+        action.sa_flags = libc::SA_RESTART;
+        action.sa_restorer = None;
+        libc::sigaction(sig, &action, std::ptr::null_mut());
+    }
+}
+
 fn main() {
     let input = input::Input::new();
     let mut screen = term::Screen::new();
     let mut game = game::Game::new();
 
-    unsafe {
-        libc::signal(libc::SIGINT, quit as libc::sighandler_t);
-        libc::signal(libc::SIGWINCH, resize as libc::sighandler_t);
-    }
+    signal(libc::SIGINT, quit as libc::sighandler_t);
+    signal(libc::SIGWINCH, resize as libc::sighandler_t);
 
     let mut time0 = time::Instant::now();
 
