@@ -50,8 +50,11 @@ pub fn move_straight(projectile: &mut Projectile, _center: &Pos, speed: f32, dt:
 }
 
 pub fn move_diagonal(projectile: &mut Projectile, center: &Pos, speed: f32, dt: f32) {
-    let dx = projectile.p.x - center.x;
+    let mut dx = projectile.p.x - center.x;
     let dy = projectile.p.y - center.y;
+    if dx == 0.0 && dy == 0.0 {
+        dx = 1.0;
+    }
     let r = f32::sqrt(dx * dx + dy * dy);
 
     let r2 = r + speed * dt;
