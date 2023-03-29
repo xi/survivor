@@ -84,9 +84,7 @@ impl Player {
             next_level: 10.0,
         };
     }
-}
 
-impl Player {
     pub fn recover(&mut self, dt: f32) {
         self.health = (self.health + self.health_recover * dt).min(self.health_max);
     }
