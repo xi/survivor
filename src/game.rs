@@ -68,12 +68,7 @@ impl Player {
             health_max: 50.0,
             health_recover: 0.0,
             power: 10.0,
-            weapons: vec![
-                weapons::Weapon::new(&weapons::AXE),
-                weapons::Weapon::new(&weapons::KNIFE),
-                weapons::Weapon::new(&weapons::STAR),
-                weapons::Weapon::new(&weapons::WIND),
-            ],
+            weapons: weapons::create_weapons(),
             damage_radius: 30.0,
             diamond_radius: 15.0,
             xp: 0.0,
@@ -177,7 +172,7 @@ impl Game {
     fn move_projectiles(&mut self, dt: f32) {
         for weapon in self.player.weapons.iter_mut() {
             for projectile in weapon.projectiles.iter_mut() {
-                (weapon.t._move)(projectile, &self.player.p, weapon.speed, dt);
+                (weapon._move)(projectile, &self.player.p, weapon.speed, dt);
             }
         }
     }
@@ -263,7 +258,7 @@ impl Game {
             }
             for weapon in self.player.weapons.iter() {
                 for projectile in weapon.projectiles.iter() {
-                    let projectile_size = enemy.t.size + weapon.t.size;
+                    let projectile_size = enemy.t.size + weapon.size;
                     if projectile.p.in_radius(&enemy.p, projectile_size) {
                         enemy.health -= weapon.damage * self.player.power * dt;
                     }
@@ -378,7 +373,7 @@ impl Game {
                 win.sprite(
                     projectile.p.x + dx,
                     projectile.p.y + dy,
-                    weapon.t.sprite,
+                    weapon.sprite,
                     projectile.dir,
                 );
             }

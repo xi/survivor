@@ -1,43 +1,21 @@
 use crate::game::{Dir, Pos};
 use crate::sprites;
 
-pub struct WeaponType {
-    pub base_speed: f32,
-    pub base_damage: f32,
-    pub base_cooldown: f32,
-    pub base_amount: u8,
-    pub size: f32,
-    pub sprite: &'static sprites::Sprite,
-    pub _move: fn(&mut Projectile, &Pos, speed: f32, dt: f32) -> (),
-}
-
 pub struct Projectile {
     pub p: Pos,
     pub dir: Dir,
 }
 
 pub struct Weapon {
+    pub sprite: &'static sprites::Sprite,
+    pub _move: fn(&mut Projectile, &Pos, speed: f32, dt: f32) -> (),
     pub speed: f32,
     pub damage: f32,
     pub cooldown: f32,
+    pub size: f32,
     pub amount: u8,
     pub last: f32,
-    pub t: &'static WeaponType,
     pub projectiles: Vec<Projectile>,
-}
-
-impl Weapon {
-    pub fn new(t: &'static WeaponType) -> Self {
-        return Self {
-            speed: t.base_speed,
-            damage: t.base_damage,
-            cooldown: t.base_cooldown,
-            amount: t.base_amount,
-            last: 0.0,
-            t: t,
-            projectiles: vec![],
-        };
-    }
 }
 
 pub fn move_straight(projectile: &mut Projectile, _center: &Pos, speed: f32, dt: f32) {
@@ -96,42 +74,51 @@ pub fn move_spiral(projectile: &mut Projectile, center: &Pos, speed: f32, dt: f3
     };
 }
 
-pub const AXE: WeaponType = WeaponType {
-    base_speed: 150.0,
-    base_damage: 50.0,
-    base_cooldown: 10.0,
-    base_amount: 2,
-    size: 7.0,
-    sprite: &sprites::AXE,
-    _move: move_parabola,
-};
-
-pub const KNIFE: WeaponType = WeaponType {
-    base_speed: 200.0,
-    base_damage: 30.0,
-    base_cooldown: 4.0,
-    base_amount: 1,
-    size: 6.0,
-    sprite: &sprites::KNIFE,
-    _move: move_straight,
-};
-
-pub const STAR: WeaponType = WeaponType {
-    base_speed: 250.0,
-    base_damage: 20.0,
-    base_cooldown: 3.0,
-    base_amount: 3,
-    size: 6.0,
-    sprite: &sprites::STAR,
-    _move: move_diagonal,
-};
-
-pub const WIND: WeaponType = WeaponType {
-    base_speed: 100.0,
-    base_damage: 40.0,
-    base_cooldown: 9.0,
-    base_amount: 1,
-    size: 8.0,
-    sprite: &sprites::WIND,
-    _move: move_spiral,
-};
+pub fn create_weapons() -> Vec<Weapon> {
+    return vec![
+        Weapon {
+            sprite: &sprites::AXE,
+            _move: move_parabola,
+            speed: 150.0,
+            damage: 50.0,
+            cooldown: 10.0,
+            size: 7.0,
+            last: 0.0,
+            amount: 0,
+            projectiles: vec![],
+        },
+        Weapon {
+            sprite: &sprites::KNIFE,
+            _move: move_straight,
+            speed: 200.0,
+            damage: 30.0,
+            cooldown: 4.0,
+            size: 6.0,
+            last: 0.0,
+            amount: 0,
+            projectiles: vec![],
+        },
+        Weapon {
+            sprite: &sprites::STAR,
+            _move: move_diagonal,
+            speed: 250.0,
+            damage: 20.0,
+            cooldown: 3.0,
+            size: 6.0,
+            last: 0.0,
+            amount: 0,
+            projectiles: vec![],
+        },
+        Weapon {
+            sprite: &sprites::WIND,
+            _move: move_spiral,
+            speed: 100.0,
+            damage: 40.0,
+            cooldown: 9.0,
+            size: 8.0,
+            last: 0.0,
+            amount: 0,
+            projectiles: vec![],
+        },
+    ];
+}
