@@ -14,6 +14,10 @@ const PERK_HEAL: usize = 4;
 const PERK_RECOVER: usize = 5;
 const PERK_ATTRACT: usize = 6;
 const PERK_XP: usize = 7;
+const PERK_AXE: usize = 8;
+const PERK_KNIFE: usize = 9;
+const PERK_STAR: usize = 10;
+const PERK_WIND: usize = 11;
 
 #[derive(PartialEq, Clone, Copy)]
 pub enum Dir {
@@ -89,7 +93,7 @@ impl Player {
             self.last_level = self.next_level;
             self.next_level *= 1.3;
 
-            match rng.gen_range(0, 8) {
+            match rng.gen_range(0, 12) {
                 PERK_POWER => self.power *= 1.1,
                 PERK_HEALTH => self.health_max *= 1.1,
                 PERK_SPEED => self.speed *= 1.1,
@@ -98,6 +102,10 @@ impl Player {
                 PERK_RECOVER => self.health_recover += 0.2,
                 PERK_ATTRACT => self.diamond_radius *= 1.1,
                 PERK_XP => self.xp_factor *= 1.1,
+                PERK_AXE => self.weapons[0].amount += 1,
+                PERK_KNIFE => self.weapons[1].amount += 1,
+                PERK_STAR => self.weapons[2].amount += 1,
+                PERK_WIND => self.weapons[3].amount += 1,
                 _ => unreachable!(),
             }
         }

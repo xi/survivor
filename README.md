@@ -18,6 +18,10 @@ the player receives a random perk:
 -	Experience from diamonds is increased by 10%
 -	Full health is restored
 -	The player recovers +0.2HP per second
+-	Get an additional axe
+-	Get an additional knive
+-	Get an additional shuriken
+-	Get an additional whirlwind
 
 ## Installation
 
