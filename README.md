@@ -16,6 +16,7 @@ the player receives a random perk:
 -	Damage radius is increased by 10%
 -	Pickup radius is increased by 10%
 -	Experience from diamonds is increased by 10%
+-	Weapon cooldown is decreased by 10%
 -	Full health is restored
 -	The player recovers +0.2HP per second
 -	Get an additional axe
