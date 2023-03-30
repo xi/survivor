@@ -77,7 +77,28 @@ fn main() {
     let mut time0 = time::Instant::now();
 
     while !NEED_QUIT.load(Ordering::Relaxed) {
-        let mut time1 = time::Instant::now();
+        if NEED_STOP.load(Ordering::Relaxed) {
+            screen.restore();
+            input.restore();
+            signal(libc::SIGTSTP, libc::SIG_DFL);
+            unsafe {
+                libc::kill(pid as libc::c_int, libc::SIGTSTP);
+            }
+
+            // when SIGCONT is received
+            screen.init();
+            input.cbreak();
+            signal(libc::SIGTSTP, handle_signal as libc::sighandler_t);
+            time0 = time::Instant::now();
+            NEED_STOP.store(false, Ordering::Relaxed);
+        }
+
+        if NEED_RESIZE.load(Ordering::Relaxed) {
+            screen.resize();
+            NEED_RESIZE.store(false, Ordering::Relaxed);
+        }
+
+        let time1 = time::Instant::now();
         let dt = (time1 - time0).as_secs_f32();
 
         while let Some(c) = input.getch() {
@@ -96,27 +117,6 @@ fn main() {
                 b'q' => NEED_QUIT.store(true, Ordering::Relaxed),
                 _ => {}
             }
-        }
-
-        if NEED_STOP.load(Ordering::Relaxed) {
-            screen.restore();
-            input.restore();
-            signal(libc::SIGTSTP, libc::SIG_DFL);
-            unsafe {
-                libc::kill(pid as libc::c_int, libc::SIGTSTP);
-            }
-
-            // when SIGCONT is received
-            screen.init();
-            input.cbreak();
-            signal(libc::SIGTSTP, handle_signal as libc::sighandler_t);
-            time1 = time::Instant::now();
-            NEED_STOP.store(false, Ordering::Relaxed);
-        }
-
-        if NEED_RESIZE.load(Ordering::Relaxed) {
-            screen.resize();
-            NEED_RESIZE.store(false, Ordering::Relaxed);
         }
 
         let mut win = win::Window {
