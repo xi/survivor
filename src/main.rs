@@ -18,20 +18,18 @@ const BLACK: [u8; 3] = [0x00, 0x00, 0x00];
 const RED: [u8; 3] = [0xff, 0x00, 0x00];
 const BLUE: [u8; 3] = [0x00, 0x00, 0xff];
 
-static RUNNING: AtomicBool = AtomicBool::new(true);
+static NEED_QUIT: AtomicBool = AtomicBool::new(false);
 static NEED_RESIZE: AtomicBool = AtomicBool::new(false);
 static NEED_STOP: AtomicBool = AtomicBool::new(false);
 
-fn quit(_sig: libc::c_int) {
-    RUNNING.store(false, Ordering::Relaxed);
-}
-
-fn resize(_sig: libc::c_int) {
-    NEED_RESIZE.store(true, Ordering::Relaxed);
-}
-
-fn stop(_sig: libc::c_int) {
-    NEED_STOP.store(true, Ordering::Relaxed);
+fn handle_signal(sig: libc::c_int) {
+    let var = match sig {
+        libc::SIGINT => &NEED_QUIT,
+        libc::SIGWINCH => &NEED_RESIZE,
+        libc::SIGTSTP => &NEED_STOP,
+        _ => unreachable!(),
+    };
+    var.store(true, Ordering::Relaxed);
 }
 
 fn render_bar(screen: &mut term::Screen, value: f32, y0: usize, color: [u8; 3]) {
@@ -72,13 +70,13 @@ fn main() {
     let mut screen = term::Screen::new();
     let mut game = game::Game::new();
 
-    signal(libc::SIGINT, quit as libc::sighandler_t);
-    signal(libc::SIGWINCH, resize as libc::sighandler_t);
-    signal(libc::SIGTSTP, stop as libc::sighandler_t);
+    signal(libc::SIGINT, handle_signal as libc::sighandler_t);
+    signal(libc::SIGWINCH, handle_signal as libc::sighandler_t);
+    signal(libc::SIGTSTP, handle_signal as libc::sighandler_t);
 
     let mut time0 = time::Instant::now();
 
-    while RUNNING.load(Ordering::Relaxed) {
+    while !NEED_QUIT.load(Ordering::Relaxed) {
         let mut time1 = time::Instant::now();
         let dt = (time1 - time0).as_secs_f32();
 
@@ -95,7 +93,7 @@ fn main() {
                     game.player.face = game::Dir::Right
                 }
                 b' ' => game.player.dir = None,
-                b'q' => quit(0),
+                b'q' => NEED_QUIT.store(true, Ordering::Relaxed),
                 _ => {}
             }
         }
@@ -111,7 +109,7 @@ fn main() {
             // when SIGCONT is received
             screen.init();
             input.cbreak();
-            signal(libc::SIGTSTP, stop as libc::sighandler_t);
+            signal(libc::SIGTSTP, handle_signal as libc::sighandler_t);
             time1 = time::Instant::now();
             NEED_STOP.store(false, Ordering::Relaxed);
         }
