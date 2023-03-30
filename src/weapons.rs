@@ -44,8 +44,17 @@ pub fn move_diagonal(projectile: &mut Projectile, center: &Pos, speed: f32, dt: 
 }
 
 pub fn move_parabola(projectile: &mut Projectile, center: &Pos, speed: f32, dt: f32) {
-    let t = (projectile.p.x - center.x).abs() / speed;
-    projectile.p.y += speed * (4.0 * t - 1.0) * dt;
+    let dx = (projectile.p.x - center.x).abs();
+    let mut t = (dx / speed).max(0.1);
+    if dx < SPAWN_RADIUS && projectile.p.y > center.y {
+        t = -t;
+    }
+
+    let acc = speed * 6.0;
+    let dy = projectile.p.y - center.y;
+    let y_speed_0 = (acc * t - dy / t).min(speed * 2.0).max(speed / 2.0);
+
+    projectile.p.y += (acc * t - y_speed_0) * dt;
     if projectile.p.x < center.x {
         projectile.p.x -= speed * dt;
         projectile.dir = Dir::Left;
