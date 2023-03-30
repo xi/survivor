@@ -1,7 +1,7 @@
 use crate::game::{Dir, Pos};
 use crate::sprites;
 
-pub const SPAWN_RADIUS: f32 = 10.0;
+pub const SPAWN_RADIUS: f32 = 16.0;
 
 pub struct Projectile {
     pub p: Pos,
