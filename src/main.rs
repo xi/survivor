@@ -80,15 +80,13 @@ fn main() {
         if NEED_STOP.load(Ordering::Relaxed) {
             screen.restore();
             input.restore();
-            signal(libc::SIGTSTP, libc::SIG_DFL);
             unsafe {
-                libc::kill(pid as libc::c_int, libc::SIGTSTP);
+                libc::kill(pid as libc::c_int, libc::SIGSTOP);
             }
 
             // when SIGCONT is received
             screen.init();
             input.cbreak();
-            signal(libc::SIGTSTP, handle_signal as libc::sighandler_t);
             time0 = time::Instant::now();
             NEED_STOP.store(false, Ordering::Relaxed);
         }
