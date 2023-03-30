@@ -226,8 +226,8 @@ impl Game {
                 for _ in 0..weapon.amount {
                     weapon.projectiles.push(weapons::Projectile {
                         p: Pos {
-                            x: self.player.p.x + self.rng.gen_f32() * 10.0 - 5.0,
-                            y: self.player.p.y + self.rng.gen_f32() * 10.0 - 5.0,
+                            x: self.player.p.x + (self.rng.gen_f32() - 0.5) * weapons::SPAWN_RADIUS,
+                            y: self.player.p.y + (self.rng.gen_f32() - 0.5) * weapons::SPAWN_RADIUS,
                         },
                         dir: match &self.player.dir {
                             Some(dir) => dir.clone(),
