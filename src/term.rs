@@ -19,8 +19,11 @@ mod ti {
     pub fn cup(x: usize, y: usize) {
         print!("\x1b[{};{}H", x + 1, y + 1);
     }
-    pub fn ed() {
-        print!("\x1b[2J");
+    pub fn smcup() {
+        print!("\x1b[?1049h");
+    }
+    pub fn rmcup() {
+        print!("\x1b[?1049l");
     }
     pub fn setab(color: [u8; 3]) {
         print!("\x1b[48;2;{};{};{}m", color[0], color[1], color[2]);
@@ -105,11 +108,12 @@ impl Screen {
 
     pub fn init(&mut self) {
         self.resize();
+        ti::smcup();
         ti::civis();
-        ti::ed();
     }
 
     pub fn restore(&self) {
+        ti::rmcup();
         ti::cnorm();
         ti::sgr0();
     }
