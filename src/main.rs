@@ -12,7 +12,7 @@ mod win;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::{thread, time};
 
-const TICK: time::Duration = time::Duration::from_millis(33);
+const TICK: time::Duration = time::Duration::from_millis(40);
 
 const BLACK: [u8; 3] = [0x00, 0x00, 0x00];
 const RED: [u8; 3] = [0xff, 0x00, 0x00];
