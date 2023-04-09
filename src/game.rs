@@ -261,6 +261,10 @@ impl Game {
             let size = enemy.t.size + self.player.size;
             if dx2 + dy2 * 4.0 < size * size {
                 self.player.health -= enemy.t.power * dt;
+
+                let d = (dx2 + dy2).sqrt();
+                enemy.p.x -= dx / d * 3.0;
+                enemy.p.y -= dy / d * 3.0;
             }
 
             if dx2 + dy2 < self.player.damage_radius * self.player.damage_radius {
@@ -271,6 +275,12 @@ impl Game {
                     let projectile_size = enemy.t.size + weapon.size;
                     if projectile.p.in_radius(&enemy.p, projectile_size) {
                         enemy.health -= weapon.damage * self.player.power * dt;
+
+                        let dx = projectile.p.x - enemy.p.x;
+                        let dy = projectile.p.y - enemy.p.y;
+                        let d = (dx * dx + dy * dy).sqrt();
+                        enemy.p.x -= dx / d * 3.0;
+                        enemy.p.y -= dy / d * 3.0;
                     }
                 }
             }
