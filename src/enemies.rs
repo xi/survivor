@@ -66,74 +66,74 @@ const ZOMBIE: EnemyType = EnemyType {
 };
 
 const EYE: EnemyType = EnemyType {
-    speed: 12.0,
+    speed: 13.0,
     size: 7.0,
-    health: 20.0,
-    power: 20.0,
+    health: 25.0,
+    power: 25.0,
     sprite: &sprites::EYE,
 };
 
 const GHOST: EnemyType = EnemyType {
     speed: 18.0,
     size: 9.0,
-    health: 15.0,
-    power: 15.0,
+    health: 30.0,
+    power: 30.0,
     sprite: &sprites::GHOST,
 };
 
 const MUMMY: EnemyType = EnemyType {
-    speed: 8.0,
+    speed: 9.0,
     size: 9.0,
-    health: 30.0,
-    power: 25.0,
+    health: 40.0,
+    power: 30.0,
     sprite: &sprites::MUMMY,
 };
 
 const HOOD: EnemyType = EnemyType {
-    speed: 14.0,
+    speed: 18.0,
     size: 9.0,
-    health: 30.0,
-    power: 40.0,
+    health: 40.0,
+    power: 50.0,
     sprite: &sprites::HOOD,
 };
 
 const HOOD2: EnemyType = EnemyType {
-    speed: 13.0,
+    speed: 16.0,
     size: 9.0,
-    health: 40.0,
-    power: 50.0,
+    health: 60.0,
+    power: 70.0,
     sprite: &sprites::HOOD2,
 };
 
 const PLANTGUY: EnemyType = EnemyType {
-    speed: 10.0,
+    speed: 12.0,
     size: 9.0,
-    health: 50.0,
-    power: 30.0,
+    health: 60.0,
+    power: 40.0,
     sprite: &sprites::PLANTGUY,
 };
 
 const RADDISH: EnemyType = EnemyType {
-    speed: 15.0,
+    speed: 17.0,
     size: 9.0,
-    health: 30.0,
-    power: 40.0,
+    health: 40.0,
+    power: 60.0,
     sprite: &sprites::RADDISH,
 };
 
 const CRAWL: EnemyType = EnemyType {
     speed: 5.0,
     size: 9.0,
-    health: 60.0,
-    power: 40.0,
+    health: 75.0,
+    power: 50.0,
     sprite: &sprites::CRAWL,
 };
 
 const SHADOW: EnemyType = EnemyType {
-    speed: 20.0,
+    speed: 22.0,
     size: 9.0,
-    health: 50.0,
-    power: 50.0,
+    health: 75.0,
+    power: 75.0,
     sprite: &sprites::SHADOW,
 };
 
@@ -171,7 +171,7 @@ pub fn get_enemy(x: f32, y: f32, i: usize) -> Enemy {
         vec![&SHADOW],
     ];
 
-    let wave = &waves[(i / 50) % waves.len()];
+    let wave = &waves[(i / 100) % waves.len()];
     let t = wave[i % wave.len()];
 
     return Enemy {

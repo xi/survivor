@@ -70,10 +70,10 @@ impl Player {
             face: Dir::Right,
             speed: 30.0,
             size: 9.0,
-            health: 50.0,
-            health_max: 50.0,
+            health: 100.0,
+            health_max: 100.0,
             health_recover: 0.0,
-            power: 10.0,
+            power: 6.0,
             weapons: weapons::create_weapons(),
             damage_radius: 30.0,
             diamond_radius: 15.0,
@@ -81,7 +81,7 @@ impl Player {
             xp_factor: 1.0,
             cooldown_factor: 1.0,
             last_level: 0.0,
-            next_level: 10.0,
+            next_level: 8.0,
         };
     }
 
@@ -92,7 +92,7 @@ impl Player {
     pub fn levelup(&mut self, rng: &mut random::Rng) {
         while self.xp >= self.next_level {
             let current_level = self.next_level;
-            self.next_level += (current_level - self.last_level) * 1.3;
+            self.next_level += (current_level - self.last_level) * 1.2;
             self.last_level = current_level;
 
             match rng.gen_range(0, 13) {
@@ -192,7 +192,7 @@ impl Game {
         let sprite_height = win::iconvert_y(sprites::HEIGHT);
         let sprite_width = win::iconvert_x(sprites::WIDTH);
 
-        if self.enemies.len() < MAX_ENEMIES && self.rng.gen_f32() < dt * 2.0 {
+        if self.enemies.len() < MAX_ENEMIES && self.rng.gen_f32() < dt * 4.0 {
             let (spawn_x, spawn_y) = match self.rng.gen_range(0, 4) {
                 0 => (self.rng.gen_f32() * width, -sprite_height),
                 1 => (width + sprite_width, self.rng.gen_f32() * height),
