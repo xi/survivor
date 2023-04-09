@@ -91,8 +91,9 @@ impl Player {
 
     pub fn levelup(&mut self, rng: &mut random::Rng) {
         while self.xp >= self.next_level {
-            self.last_level = self.next_level;
-            self.next_level *= 1.3;
+            let current_level = self.next_level;
+            self.next_level += (current_level - self.last_level) * 1.3;
+            self.last_level = current_level;
 
             match rng.gen_range(0, 13) {
                 PERK_POWER => self.power *= 1.1,
