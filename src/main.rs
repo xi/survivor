@@ -64,7 +64,7 @@ fn signal(sig: libc::c_int, handler: libc::sighandler_t) {
     }
 }
 
-fn main() {
+fn run_in_screen() -> Option<f32> {
     let pid = std::process::id();
     let mut input = input::Input::new();
     let mut screen = term::Screen::new();
@@ -131,13 +131,21 @@ fn main() {
         screen.render();
 
         if game.player.health < 0.0 {
-            println!("\nyou died (score: {})", game.player.xp as usize);
-            break;
+            return Some(game.player.xp);
         }
 
         let time2 = time::Instant::now();
         if TICK > time2 - time1 {
             thread::sleep(TICK - (time2 - time1));
         }
+    }
+
+    return None
+}
+
+fn main() {
+    let result = run_in_screen();
+    if let Some(score) = result {
+        println!("\nyou died (total XP: {:.0})", score);
     }
 }
