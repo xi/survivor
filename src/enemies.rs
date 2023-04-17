@@ -139,7 +139,7 @@ const SHADOW: EnemyType = EnemyType {
 
 pub fn get_wave(i: usize) -> Vec<(&'static EnemyType, f32)> {
     let waves = [
-        vec![(&SNAKE, 4.0)],
+        vec![(&SNAKE, 2.0)],
         vec![(&SNAKE, 2.0), (&SKELETON, 2.0)],
         vec![(&SNAKE, 2.0), (&SKELETON, 2.0)],
         vec![(&BAT, 4.0)],
@@ -156,19 +156,21 @@ pub fn get_wave(i: usize) -> Vec<(&'static EnemyType, f32)> {
         vec![(&MUMMY, 2.0), (&ZOMBIE, 2.0)],
         vec![(&HOOD, 4.0)],
         vec![(&HOOD, 2.0), (&EYE, 2.0)],
+        vec![(&BAT, 10.0)],
         vec![(&SNAKE, 2.0), (&PLANTGUY, 2.0)],
         vec![(&SNAKE, 2.0), (&PLANTGUY, 2.0)],
         vec![(&HOOD2, 4.0)],
         vec![(&HOOD2, 2.0), (&HOOD, 2.0)],
         vec![(&HOOD2, 4.0)],
+        vec![(&GHOST, 8.0)],
         vec![(&SNAKE, 2.0), (&RADDISH, 2.0)],
         vec![(&RADDISH, 2.0), (&PLANTGUY, 2.0)],
         vec![(&SKELETON2, 2.0), (&CRAWL, 2.0)],
         vec![(&SKELETON2, 2.0), (&CRAWL, 2.0)],
         vec![(&CRAWL, 4.0)],
-        vec![(&SHADOW, 4.0)],
-        vec![(&SHADOW, 4.0)],
-        vec![(&SHADOW, 4.0)],
+        vec![(&SHADOW, 3.0)],
+        vec![(&SHADOW, 4.0), (&CRAWL, 8.0)],
+        vec![(&SHADOW, 5.0)],
     ];
 
     return waves[(i / 100) % waves.len()].clone();
