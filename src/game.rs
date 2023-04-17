@@ -192,21 +192,26 @@ impl Game {
         let sprite_height = win::iconvert_y(sprites::HEIGHT);
         let sprite_width = win::iconvert_x(sprites::WIDTH);
 
-        if self.enemies.len() < MAX_ENEMIES && self.rng.gen_f32() < dt * 4.0 {
-            let (spawn_x, spawn_y) = match self.rng.gen_range(0, 4) {
-                0 => (self.rng.gen_f32() * width, -sprite_height),
-                1 => (width + sprite_width, self.rng.gen_f32() * height),
-                2 => (self.rng.gen_f32() * width, height + sprite_height),
-                3 => (-sprite_width, self.rng.gen_f32() * height),
-                _ => unreachable!(),
-            };
+        for (t, p) in enemies::get_wave(self.i_enemy) {
+            if self.enemies.len() < MAX_ENEMIES && self.rng.gen_f32() < dt * p {
+                let (spawn_x, spawn_y) = match self.rng.gen_range(0, 4) {
+                    0 => (self.rng.gen_f32() * width, -sprite_height),
+                    1 => (width + sprite_width, self.rng.gen_f32() * height),
+                    2 => (self.rng.gen_f32() * width, height + sprite_height),
+                    3 => (-sprite_width, self.rng.gen_f32() * height),
+                    _ => unreachable!(),
+                };
 
-            self.enemies.push(enemies::get_enemy(
-                spawn_x + self.player.p.x - width / 2.0,
-                spawn_y + self.player.p.y - height / 2.0,
-                self.i_enemy,
-            ));
-            self.i_enemy += 1;
+                self.enemies.push(enemies::Enemy {
+                    p: Pos {
+                        x: spawn_x + self.player.p.x - width / 2.0,
+                        y: spawn_y + self.player.p.y - height / 2.0,
+                    },
+                    health: t.health,
+                    t: t,
+                });
+                self.i_enemy += 1;
+            }
         }
     }
 

@@ -137,46 +137,39 @@ const SHADOW: EnemyType = EnemyType {
     sprite: &sprites::SHADOW,
 };
 
-pub fn get_enemy(x: f32, y: f32, i: usize) -> Enemy {
+pub fn get_wave(i: usize) -> Vec<(&'static EnemyType, f32)> {
     let waves = [
-        vec![&SNAKE],
-        vec![&SNAKE, &SKELETON],
-        vec![&SNAKE, &SKELETON],
-        vec![&BAT],
-        vec![&ZOMBIE],
-        vec![&ZOMBIE],
-        vec![&BAT, &SKELETON],
-        vec![&BAT, &SKELETON],
-        vec![&BAT, &EYE],
-        vec![&GHOST],
-        vec![&GHOST],
-        vec![&BAT2, &ZOMBIE],
-        vec![&BAT2, &ZOMBIE],
-        vec![&MUMMY, &ZOMBIE],
-        vec![&MUMMY, &ZOMBIE],
-        vec![&HOOD],
-        vec![&HOOD, &EYE],
-        vec![&SNAKE, &PLANTGUY],
-        vec![&SNAKE, &PLANTGUY],
-        vec![&HOOD2],
-        vec![&HOOD2, &HOOD],
-        vec![&HOOD2],
-        vec![&SNAKE, &RADDISH],
-        vec![&RADDISH, &PLANTGUY],
-        vec![&SKELETON2, &CRAWL],
-        vec![&SKELETON2, &CRAWL],
-        vec![&CRAWL],
-        vec![&SHADOW],
-        vec![&SHADOW],
-        vec![&SHADOW],
+        vec![(&SNAKE, 4.0)],
+        vec![(&SNAKE, 2.0), (&SKELETON, 2.0)],
+        vec![(&SNAKE, 2.0), (&SKELETON, 2.0)],
+        vec![(&BAT, 4.0)],
+        vec![(&ZOMBIE, 4.0)],
+        vec![(&ZOMBIE, 4.0)],
+        vec![(&BAT, 2.0), (&SKELETON, 2.0)],
+        vec![(&BAT, 2.0), (&SKELETON, 2.0)],
+        vec![(&BAT, 2.0), (&EYE, 2.0)],
+        vec![(&GHOST, 4.0)],
+        vec![(&GHOST, 4.0)],
+        vec![(&BAT2, 2.0), (&ZOMBIE, 2.0)],
+        vec![(&BAT2, 2.0), (&ZOMBIE, 2.0)],
+        vec![(&MUMMY, 2.0), (&ZOMBIE, 2.0)],
+        vec![(&MUMMY, 2.0), (&ZOMBIE, 2.0)],
+        vec![(&HOOD, 4.0)],
+        vec![(&HOOD, 2.0), (&EYE, 2.0)],
+        vec![(&SNAKE, 2.0), (&PLANTGUY, 2.0)],
+        vec![(&SNAKE, 2.0), (&PLANTGUY, 2.0)],
+        vec![(&HOOD2, 4.0)],
+        vec![(&HOOD2, 2.0), (&HOOD, 2.0)],
+        vec![(&HOOD2, 4.0)],
+        vec![(&SNAKE, 2.0), (&RADDISH, 2.0)],
+        vec![(&RADDISH, 2.0), (&PLANTGUY, 2.0)],
+        vec![(&SKELETON2, 2.0), (&CRAWL, 2.0)],
+        vec![(&SKELETON2, 2.0), (&CRAWL, 2.0)],
+        vec![(&CRAWL, 4.0)],
+        vec![(&SHADOW, 4.0)],
+        vec![(&SHADOW, 4.0)],
+        vec![(&SHADOW, 4.0)],
     ];
 
-    let wave = &waves[(i / 100) % waves.len()];
-    let t = wave[i % wave.len()];
-
-    return Enemy {
-        p: Pos { x: x, y: y },
-        health: t.health,
-        t: t,
-    };
+    return waves[(i / 100) % waves.len()].clone();
 }
