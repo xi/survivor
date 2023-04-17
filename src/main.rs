@@ -74,8 +74,6 @@ fn main() {
     signal(libc::SIGWINCH, handle_signal as libc::sighandler_t);
     signal(libc::SIGTSTP, handle_signal as libc::sighandler_t);
 
-    let mut time0 = time::Instant::now();
-
     while !NEED_QUIT.load(Ordering::Relaxed) {
         if NEED_STOP.load(Ordering::Relaxed) {
             screen.restore();
@@ -87,7 +85,6 @@ fn main() {
             // when SIGCONT is received
             screen.init();
             input.cbreak();
-            time0 = time::Instant::now();
             NEED_STOP.store(false, Ordering::Relaxed);
         }
 
@@ -97,7 +94,6 @@ fn main() {
         }
 
         let time1 = time::Instant::now();
-        let dt = (time1 - time0).as_secs_f32();
 
         while let Some(c) = input.getch() {
             match c {
@@ -126,7 +122,7 @@ fn main() {
         };
         let width = win::iconvert_x(win.width);
         let height = win::iconvert_y(win.height);
-        game.step(dt, width, height);
+        game.step(TICK.as_secs_f32(), width, height);
         game.render(&mut win);
 
         render_xp_bar(&game.player, &mut screen);
@@ -143,6 +139,5 @@ fn main() {
         if TICK > time2 - time1 {
             thread::sleep(TICK - (time2 - time1));
         }
-        time0 = time1;
     }
 }
