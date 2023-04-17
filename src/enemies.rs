@@ -139,7 +139,7 @@ const SHADOW: EnemyType = EnemyType {
 
 pub fn get_enemy(x: f32, y: f32, i: usize) -> Enemy {
     let waves = [
-        vec![&SNAKE, &SNAKE],
+        vec![&SNAKE],
         vec![&SNAKE, &SKELETON],
         vec![&SNAKE, &SKELETON],
         vec![&BAT],
