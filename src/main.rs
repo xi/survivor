@@ -133,7 +133,6 @@ fn main() {
         render_health_bar(&game.player, &mut screen);
 
         screen.render();
-        print!("{:?}", 1.0 / dt);
 
         if game.player.health < 0.0 {
             println!("\nyou died (score: {})", game.player.xp as usize);

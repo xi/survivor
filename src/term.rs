@@ -121,7 +121,7 @@ impl Screen {
     pub fn resize(&mut self) {
         let (w, h) = get_terminal_size();
         self.width = w * 2;
-        self.height = (h - 1) * 3;
+        self.height = h * 3;
         self.pixels = vec![vec![[0, 0, 0]; self.width]; self.height];
     }
 
@@ -158,8 +158,6 @@ impl Screen {
                 print!("\n");
             }
         }
-
-        ti::sgr0();
     }
 }
 
