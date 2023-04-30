@@ -97,13 +97,13 @@ fn run_in_screen() -> Option<f32> {
 
         while let Some(c) = input.getch() {
             match c {
-                b'w' | b'A' => game.player.dir = Some(game::Dir::Up),
-                b'a' | b'D' => {
+                b'w' | b'k' | b'A' => game.player.dir = Some(game::Dir::Up),
+                b'a' | b'h' | b'D' => {
                     game.player.dir = Some(game::Dir::Left);
                     game.player.face = game::Dir::Left
                 }
-                b's' | b'B' => game.player.dir = Some(game::Dir::Down),
-                b'd' | b'C' => {
+                b's' | b'j' | b'B' => game.player.dir = Some(game::Dir::Down),
+                b'd' | b'l' | b'C' => {
                     game.player.dir = Some(game::Dir::Right);
                     game.player.face = game::Dir::Right
                 }

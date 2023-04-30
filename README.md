@@ -32,10 +32,7 @@ standard library and libc. You can run `cargo run` to build and execute it.
 
 ## Controls
 
--	Up/w: move up
--	Right/d: move right
--	Down/s: move down
--	Left/a: move left
+-	Arrow keys / wasd / hjkl: move
 -	Space: stop moving
 -	q: quit
 
