@@ -6,14 +6,15 @@ Survivor is a graphical action game for the Linux terminal. It is havily
 inspired by Vampire Survivors.
 
 The player controls an automatically attacking character, with the goal to
-survive for as long as possible. Killed enemies drop diamonds that can be
-collected to gain XP. When the blue XP bar at the top of the screen is full
-the player receives a random perk:
+survive for as long as possible. At the start the character's only weapon is a
+shield that damages nearby enemies. Killed enemies drop diamonds that can be
+collected to gain XP. When the blue XP bar at the top of the screen is full the
+player receives a random perk:
 
 -	Damage is increased by 10%
 -	Max health is increased by 10%
 -	Movement speed is increased by 10%
--	Damage radius is increased by 10%
+-	Shield radius is increased by 10%
 -	Pickup radius is increased by 10%
 -	Experience from diamonds is increased by 10%
 -	Weapon cooldown is decreased by 10%
