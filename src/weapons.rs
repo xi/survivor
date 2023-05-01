@@ -70,7 +70,7 @@ pub fn move_spiral(projectile: &mut Projectile, center: &Pos, speed: f32, dt: f3
     let r = f32::sqrt(dx * dx + dy * dy);
     let angle = dy.atan2(dx);
 
-    let r2 = r + 20.0 * dt;
+    let r2 = r + 25.0 * dt;
     let angle2 = angle + speed * dt / r.max(1.0);
 
     let (sin, cos) = angle2.sin_cos();
