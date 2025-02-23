@@ -4,7 +4,7 @@ fn get_terminal_size() -> (usize, usize) {
     let mut w: libc::winsize;
     unsafe {
         w = std::mem::zeroed();
-        libc::ioctl(1, libc::TIOCGWINSZ, &mut w);
+        libc::ioctl(libc::STDOUT_FILENO, libc::TIOCGWINSZ, &mut w);
     }
     return (w.ws_col as usize, w.ws_row as usize);
 }
