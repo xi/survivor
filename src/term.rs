@@ -1,10 +1,10 @@
 extern crate libc;
 
 fn get_terminal_size() -> (usize, usize) {
-    let w: libc::winsize;
+    let mut w: libc::winsize;
     unsafe {
         w = std::mem::zeroed();
-        libc::ioctl(1, libc::TIOCGWINSZ, &w);
+        libc::ioctl(1, libc::TIOCGWINSZ, &mut w);
     }
     return (w.ws_col as usize, w.ws_row as usize);
 }
