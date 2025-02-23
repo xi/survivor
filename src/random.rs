@@ -16,7 +16,7 @@ impl Rng {
         };
     }
 
-    fn gen(&mut self) -> usize {
+    fn generate(&mut self) -> usize {
         // https://github.com/smol-rs/fastrand/blob/master/src/lib.rs
         let s = self.state.wrapping_add(0xA0761D6478BD642F);
         self.state = s;
@@ -25,12 +25,12 @@ impl Rng {
     }
 
     pub fn gen_range(&mut self, low: usize, high: usize) -> usize {
-        return low + self.gen() % (high - low);
+        return low + self.generate() % (high - low);
     }
 
     pub fn gen_f32(&mut self) -> f32 {
         // https://en.wikipedia.org/wiki/Single-precision_floating-point_format
-        let u = self.gen() as u32;
+        let u = self.generate() as u32;
         return f32::from_bits((127 << 23) | u >> 9) - 1.0;
     }
 }
