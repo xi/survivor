@@ -174,7 +174,7 @@ impl Game {
             dx /= d;
             dy /= d;
 
-            let mut enemy = &mut self.enemies[i];
+            let enemy = &mut self.enemies[i];
             enemy.p.x += dx * enemy.t.speed * dt;
             enemy.p.y += dy * enemy.t.speed * dt;
         }
